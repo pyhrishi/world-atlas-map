@@ -1254,7 +1254,7 @@ async function geocode(){
  let data={};
  try{const s=await fbDb.doc('atlas/coords').get();if(s.exists){data=JSON.parse(s.data().d||'{}');geo.done=!!s.data().done}}catch(e){geo.running=false;return}
  const absorb=()=>{for(const k in data)if(Array.isArray(data[k]))COORD.set(k,data[k]);geo.found=COORD.size;geo.total=P.length;geo.checked=P.filter(p=>data[K(p)]!==undefined&&data[K(p)]!==-1).length;distVer++};
- absorb();if(geo.done){geo.running=false;xChangedLight();return}
+ absorb();if(geo.done&&P.every(p=>data[K(p)]!==undefined)){geo.running=false;xChangedLight();return}geo.done=false;
  let unsaved=0;const save=async final=>{try{const s=await fbDb.doc('atlas/coords').get();if(s.exists){const o=JSON.parse(s.data().d||'{}');for(const k in o)if(Array.isArray(o[k])&&!Array.isArray(data[k]))data[k]=o[k];else if(data[k]===undefined)data[k]=o[k]}
    await fbDb.doc('atlas/coords').set({d:JSON.stringify(data),found:Object.values(data).filter(Array.isArray).length,done:!!final,at:firebase.firestore.FieldValue.serverTimestamp()});unsaved=0}catch(e){}absorb();xChangedLight()};
  const put=(p,lat,lon)=>{data[K(p)]=[Math.round(lat*1e4)/1e4,Math.round(lon*1e4)/1e4];unsaved++};
