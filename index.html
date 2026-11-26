@@ -36,6 +36,7 @@ h1 em{color:var(--mute)}
 .stats{display:flex;gap:22px;font-variant-numeric:tabular-nums}
 .stats b{display:block;font:400 30px/1 "Instrument Serif",serif}
 .stats span{font-size:12px;color:var(--dim)}
+.top-tools{display:flex;align-items:flex-start;gap:12px}.refresh-btn{width:42px;height:42px;flex:none;border:1px solid var(--line);border-radius:14px;background:var(--s2);color:var(--mute);display:grid;place-items:center;cursor:pointer;transition:background .15s,border-color .15s,color .15s}.refresh-btn:hover{background:var(--s3);border-color:#4a4f58;color:var(--ink)}.refresh-btn:active{transform:scale(.94)}.refresh-btn svg.i{width:19px;height:19px}@media(max-width:560px){.top-tools{gap:8px}.refresh-btn{width:38px;height:38px}}
 .globe{position:relative;width:100%;height:100%;min-height:360px}
 .globe canvas{position:absolute;inset:0;width:100%;height:100%;cursor:grab;touch-action:pan-y}
 .globe canvas:active{cursor:grabbing}
@@ -487,7 +488,7 @@ html,body{width:100%;max-width:100%;overflow-x:clip}
 <section class="hero" id="hero">
  <div class="top">
   <div><h1>10,000 places<br><em>to see on Earth</em></h1><p class="lede" id="lede">Spin the globe and tap a country. Brighter countries hold more places.</p></div>
-  <div class="stats" id="stats"></div>
+  <div class="top-tools"><div class="stats" id="stats"></div><button class="refresh-btn" id="hardRefresh" type="button" aria-label="Clear app cache and refresh" title="Clear app cache and refresh"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9A7 7 0 0 1 18 6.5L20 12M4 12l2 5.5A7 7 0 0 0 18.4 15"/></svg></button></div>
  </div>
  <div class="globe" id="gwrap"><canvas id="globe" aria-label="Interactive globe. Drag to spin, tap a country to filter."></canvas><div class="tip" id="tip"></div>
   <div class="gctl"><button id="zin" aria-label="Zoom in"><svg class="i"><use href="#i-plus"/></svg></button><button id="zout" aria-label="Zoom out"><svg class="i"><use href="#i-minus"/></svg></button><button id="greset" aria-label="Reset globe"><svg class="i"><use href="#i-rotate-ccw"/></svg></button></div>
@@ -683,6 +684,23 @@ function aboutUI(p){const box=$('dwk');if(!PHOTOS){box.innerHTML='';return}
  box.innerHTML='<div class="ln" style="width:96%"></div><div class="ln" style="width:88%"></div><div class="ln" style="width:60%"></div>';
  about(p).then(r=>{if(cur!==p)return;if(!r){box.innerHTML='';return}
   box.innerHTML=`<p>${esc(r[0])}</p><div class="wf"><span>From Wikipedia · ${esc(r[1])}</span><a href="https://en.wikipedia.org/wiki/${encodeURIComponent(r[1].replace(/ /g,'_'))}" target="_blank" rel="noopener">Read more${ic('chevron-right')}</a></div>`},()=>{if(cur===p)box.innerHTML=''})}
+/* Full app refresh: clear Cache Storage and service-worker registrations, preserve user data in localStorage. */
+async function hardRefresh(){
+ const b=$('hardRefresh');if(b.disabled)return;b.disabled=true;b.setAttribute('aria-busy','true');
+ try{
+  if('serviceWorker' in navigator){
+   const regs=await navigator.serviceWorker.getRegistrations();
+   await Promise.all(regs.map(r=>r.unregister()));
+  }
+  if('caches' in window){
+   const names=await caches.keys();
+   await Promise.all(names.map(n=>caches.delete(n)));
+  }
+ }catch(e){console.warn('App cache cleanup was incomplete:',e)}
+ const u=new URL(location.href);u.searchParams.set('_fresh',Date.now().toString());
+ location.replace(u.href);
+}
+$('hardRefresh').addEventListener('click',hardRefresh);
 /* offline */
 if(PHOTOS&&'serviceWorker' in navigator){const reg=()=>navigator.serviceWorker.register('sw.js').catch(()=>{});document.readyState==='complete'?reg():addEventListener('load',reg)}
 {const o=document.createElement('div');o.className='off';o.textContent='Offline · using saved data';document.body.appendChild(o);const u=()=>o.classList.toggle('on',!navigator.onLine);addEventListener('online',u);addEventListener('offline',u);u()}
