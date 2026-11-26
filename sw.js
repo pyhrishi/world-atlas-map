@@ -1,4 +1,4 @@
-const V='atlas-v7-fast',APP='app-'+V,PH='photos-v1',API='wiki-v1';
+const V='atlas-v8-auth',APP='app-'+V,PH='photos-v1',API='wiki-v1';
 const CORE=['./','index.html','places.json','geo.json','manifest.json','apple-touch-icon.png','icon-192.png','icon-512.png','https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(APP).then(c=>Promise.all(CORE.map(u=>c.add(new Request(u,{mode:u.startsWith('http')?'no-cors':'same-origin'})).catch(()=>{})))).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>![APP,PH,API].includes(k)).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
@@ -16,5 +16,5 @@ self.addEventListener('fetch',e=>{const req=e.request;if(req.method!=='GET')retu
  if(u.hostname==='en.wikipedia.org')return e.respondWith(netFirst(req,API,3000));
  if(req.mode==='navigate')return e.respondWith(fresh(new Request('index.html'),APP));
  if(u.origin===location.origin&&/\.(json|html)$|\/$/.test(u.pathname))return e.respondWith(fresh(req,APP));
- if(u.origin===location.origin||/cdnjs\.cloudflare\.com|fonts\.(googleapis|gstatic)\.com/.test(u.hostname))return e.respondWith(swr(req,APP));
+ if(u.origin===location.origin||/cdnjs\.cloudflare\.com|fonts\.(googleapis|gstatic)\.com/.test(u.hostname)||(u.hostname==="www.gstatic.com"&&u.pathname.startsWith("/firebasejs/")))return e.respondWith(swr(req,APP));
 });
