@@ -1,5 +1,5 @@
-const V='atlas-v15-15k',APP='app-'+V,PH='photos-v1',API='wiki-v1';
-const CORE=['./','index.html','geo.json','manifest.json','apple-touch-icon.png','icon-192.png','icon-512.png','vendor/d3-7.8.5.min.js','vendor/firebase-app-compat-10.12.2.js','vendor/firebase-auth-compat-10.12.2.js','vendor/firebase-firestore-compat-10.12.2.js'];
+const V='atlas-v16-cols',APP='app-'+V,PH='photos-v1',API='wiki-v1';
+const CORE=['./','index.html','geo.json','tags.json','manifest.json','apple-touch-icon.png','icon-192.png','icon-512.png','vendor/d3-7.8.5.min.js','vendor/firebase-app-compat-10.12.2.js','vendor/firebase-auth-compat-10.12.2.js','vendor/firebase-firestore-compat-10.12.2.js'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(APP).then(c=>Promise.all(CORE.map(u=>c.add(new Request(u,{mode:u.startsWith('http')?'no-cors':'same-origin'})).catch(()=>{})))).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>![APP,PH,API].includes(k)).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 async function trim(name,max){const c=await caches.open(name),ks=await c.keys();for(let i=0;i<ks.length-max;i++)await c.delete(ks[i])}

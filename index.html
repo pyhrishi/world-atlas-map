@@ -150,6 +150,15 @@ h1 em{color:var(--mute)}
 /* country band */
 .cband{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center;margin:18px 0 4px;padding:20px;border-radius:24px;background:linear-gradient(135deg,var(--s2),var(--s1));border:1px solid var(--line)}
 .cband:empty{display:none}
+.csub{margin:12px 0 0}.csub:empty{display:none}.csub .chip{min-height:36px;font-size:13px}
+.cnote{font-size:14px;color:#d5d8dd;line-height:1.5}.cnote small{display:block;color:var(--dim);font-size:12px;margin-top:6px}
+.cprog{height:8px;border-radius:8px;background:var(--s3);overflow:hidden;margin-top:12px;max-width:340px}.cprog i{display:block;height:100%;background:var(--been,#5fbf8f)}
+.cact{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.cact .btn{min-height:38px;font-size:13px}
+.col.new{border-style:dashed;background:transparent}
+.ckrow{all:unset;box-sizing:border-box;display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;padding:10px 12px;border-radius:14px;background:var(--s2);border:1px solid var(--line);margin-bottom:6px;cursor:pointer}
+.ckrow b{display:block;font-weight:600;font-size:14px}.ckrow small{color:var(--dim);font-size:12px}.ckrow .cprog{margin-top:6px;height:5px}
+.ckrow em{font-style:normal;font-variant-numeric:tabular-nums;color:var(--mute);font-size:13px}
+.acnew{display:flex;gap:8px;margin-top:6px}.acnew input{flex:1;min-width:0;background:var(--s2);border:1px solid var(--line);border-radius:14px;padding:0 12px;min-height:44px;color:var(--ink);font:inherit}
 .cband .types{display:flex;gap:6px;flex-wrap:wrap}
 .cband .types span{display:flex;align-items:center;gap:6px;font-size:13px;background:var(--s3);border-radius:20px;padding:5px 10px;color:#d5d8dd}
 .cband .types svg.i{width:15px;height:15px}
@@ -584,7 +593,7 @@ body.locked{overflow:hidden}
 <div class="wrap">
  <div class="sec-h"><h2>Collections</h2><p>Tap one to filter the list and the globe</p></div>
  <div class="cols" id="cols"></div>
- <div class="lhead"><div class="lhead-main"><div><h2 id="lt">All places</h2><p id="ls"></p></div><div class="view-group inline-view" role="group" aria-label="Destination layout"><button type="button" data-view="grid" aria-pressed="true">Cards</button><button type="button" data-view="list" aria-pressed="false">List</button></div></div><div class="chips-on" id="active"></div></div>
+ <div class="lhead"><div class="lhead-main"><div><h2 id="lt">All places</h2><p id="ls"></p></div><div class="view-group inline-view" role="group" aria-label="Destination layout"><button type="button" data-view="grid" aria-pressed="true">Cards</button><button type="button" data-view="list" aria-pressed="false">List</button></div></div><div class="chips-on" id="active"></div><div class="chips csub" id="csub"></div></div>
  <div class="cband" id="cband"></div>
  <div class="qchips" id="qc"></div>
  <main id="list"><div class="sk" style="margin-top:10px"></div><div class="sk" style="margin-top:10px"></div><div class="sk" style="margin-top:10px"></div><div class="sk" style="margin-top:10px"></div><div class="sk" style="margin-top:10px"></div><div class="sk" style="margin-top:10px"></div></main>
@@ -636,6 +645,8 @@ body.locked{overflow:hidden}
 </dialog>
 <dialog class="sheet" id="tp" aria-labelledby="tph"><div class="sh"><h3 id="tph">My trips</h3><button class="x" data-close aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div><div class="sb" id="tpb"></div></dialog>
 <dialog class="sheet" id="at" aria-labelledby="ath"><div class="sh"><h3 id="ath">Add to trip</h3><button class="x" data-close aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div><div class="sb" id="atb"></div></dialog>
+<dialog class="sheet" id="ac" aria-labelledby="ach"><div class="sh"><h3 id="ach">Save to collection</h3><button class="x" data-close aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div><div class="sb" id="acb"></div></dialog>
+<dialog class="sheet" id="ck" aria-labelledby="ckh"><div class="sh"><h3 id="ckh">Country checklists</h3><button class="x" data-close aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div><div class="sb"><div class="chips" id="ckf"></div><p class="tmuted" id="cks"></p><div id="ckl" style="margin-top:12px"></div></div></dialog>
 <dialog class="sheet" id="dd" aria-labelledby="dn">
  <div class="grab"></div>
  <div class="pc" id="dpc"></div>
@@ -653,7 +664,7 @@ body.locked{overflow:hidden}
   </div>
   <div class="ig" id="dig"></div>
   <div class="marks"><button class="mk" data-k="w" id="mw"><svg class="i"><use href="#i-heart"/></svg>Want to go</button><button class="mk" data-k="b" id="mb"><svg class="i"><use href="#i-circle-check"/></svg>Been here</button></div>
-  <button class="btn addtrip" id="dtrip" type="button"><svg class="i"><use href="#i-route"/></svg>Add to trip</button>
+  <button class="btn addtrip" id="dtrip" type="button"><svg class="i"><use href="#i-route"/></svg>Add to trip</button><button class="btn addtrip" id="dcol" type="button"><svg class="i"><use href="#i-star"/></svg>Save to collection</button>
   <div class="jr" id="djr" hidden></div>
   <div class="lbl"><svg class="i"><use href="#i-sparkles"/></svg>More like this</div><div class="like" id="dlike"></div>
   <div class="tools"><button class="btn" id="dcopy"><svg class="i"><use href="#i-copy"/></svg>Copy name</button><button class="btn" id="dnext"><svg class="i"><use href="#i-shuffle"/></svg>Another</button></div>
@@ -676,7 +687,28 @@ const TIER={L:'Legendary',I:'Iconic',G:'Gem'};
 const TC={N:'#5ec4a8',C:'#8fa8e0',H:'#e9c46a',B:'#f0cf9a',M:'#a9c9ee',S:'#f2a65e',L:'#bba6ec',W:'#a6d36a',X:'#f08fb3'};
 const cic=(c,cls='cic')=>`<span class="${cls}" style="--tc:${TC[c]}">${ic(CAT[c][1])}</span>`;
 const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const VISA={AO:'f',BB:'f',BT:'f',VG:'f',CK:'f',DM:'f',FJ:'f',GD:'f',HT:'f',JM:'f',KZ:'f',KI:'f',MY:'f',MU:'f',FM:'f',MS:'f',NP:'f',NU:'f',PH:'f',QA:'f',RW:'f',SN:'f',VC:'f',GM:'f',TT:'f',VU:'f',
+ BI:'a',KH:'a',CV:'a',KM:'a',DJ:'a',ET:'a',GW:'a',ID:'a',JO:'a',LA:'a',MG:'a',MV:'a',MH:'a',MN:'a',MZ:'a',MM:'a',PW:'a',WS:'a',SL:'a',LK:'a',LC:'a',TZ:'a',TH:'a',TL:'a',TV:'a',ZW:'a',KE:'e',SC:'e',KN:'e'};
+const VISA_AS_OF='July 2026';
+const ANIMALS=[['tiger','Tigers'],['lion','Lions'],['cat','Leopards & jaguars'],['elephant','Elephants'],['rhino','Rhinos'],['ape','Gorillas & great apes'],['bear','Bears & pandas'],['whale','Whales'],['dolphin','Dolphins'],['shark','Sharks & rays'],['turtle','Turtles'],['penguin','Penguins'],['bird','Birds'],['lemur','Lemurs']];
+const hk=s=>{let x=0x811c9dc5;for(let i=0;i<s.length;i++){x^=s.charCodeAt(i);x=Math.imul(x,0x01000193)>>>0}return x.toString(16)};
+let TAGS={};
+const has=(p,t)=>(' '+p.tg+' ').includes(' '+t+' ');
+const MONSOON=0b111100000;
+const isFest=p=>/festival|carnival|parade|fiesta|new year|celebration|procession|matsuri|fair\b|mela|utsav|puja|jatra|tsechu|holi|diwali|pooram|naadam|songkran|perahera|grand prix|derby|regatta/.test(p.x);
+const isFood=p=>p.c==='X'&&/food|market|wine|beer|brew|coffee|tea\b|street|dumpling|pizza|bbq|barbecue|whisky|rum|cuisine|tasting|feast|noodle|tapas|pintxo|cheese|chocolate|seafood|kebab|ramen|sake|biryani|curry|thali|sweet|dessert|bread|pastry|soup|stew|cake|harvest/.test(p.x);
+const nearSort=(a,b)=>{const x=fromHome(a),y=fromHome(b);return(x?x.km:1e9)-(y?y.km:1e9)};
 const COLS=[
+ ['now','Right now','sun',p=>p.mo!==4095&&(p.mo>>NOW)&1,{dyn:1,sort:nearSort,desc:()=>`At their best in ${MON[NOW]}, nearest to ${home()[0]} first.`}],
+ ['wknd','Weekend from home','house',p=>{const d=fromHome(p);return!!d&&d.km<=300},{dyn:1,sort:nearSort,desc:()=>`Within about 300 km of ${home()[0]}. More appear as exact locations are found.`}],
+ ['short','Short flights','plane',p=>{const d=fromHome(p);return!!d&&d.mode==='fly'&&d.h<=3},{dyn:1,sort:nearSort,desc:()=>`Under about 3 hours' flying from ${home()[0]}. Rough times, not schedules.`}],
+ ['legend','The Legendary 100','crown',p=>p.t==='L',{band:'legend'}],
+ ['monsoon','Monsoon escapes','droplets',p=>p.mo!==4095&&((p.mo&MONSOON).toString(2).split('1').length-1)>=2,{sort:nearSort,desc:()=>`Escape the Indian monsoon: at their best for at least two months between June and September, nearest to ${home()[0]} first.`}],
+ ['unesco','UNESCO World Heritage','landmark',p=>has(p,'u'),{desc:()=>'Places that are, or sit inside, UNESCO World Heritage Sites.'}],
+ ['visa','Easy visa for Indians','ticket',p=>!!VISA[p.iso],{subs:[['f','Visa-free',p=>VISA[p.iso]==='f'],['a','Visa on arrival',p=>VISA[p.iso]==='a'],['e','Online pass (ETA)',p=>VISA[p.iso]==='e']],desc:()=>`For Indian passport holders, based on the Henley Passport Index as of ${VISA_AS_OF}. Rules change often, so check the embassy site before you book.`}],
+ ['treks','Treks & hikes','mountain-snow',p=>/(^| )k[emh]( |$)/.test(p.tg),{subs:[['e','Easy',p=>has(p,'ke')],['m','Moderate',p=>has(p,'km')],['h','Hard',p=>has(p,'kh')]],sort:(a,b)=>'emh'.indexOf((a.tg.match(/\bk([emh])\b/)||[])[1])-'emh'.indexOf((b.tg.match(/\bk([emh])\b/)||[])[1]),desc:()=>'Easy: a few hours, little climbing. Moderate: long days or some altitude. Hard: multi-day, high altitude or technical.'}],
+ ['calendar','Festival & food calendar','drama',p=>isFest(p)||(isFood(p)&&p.mo!==4095),{subs:MON.map((m,i)=>[String(i),m,p=>(p.mo>>i)&1]),subDefault:()=>String(NOW),desc:()=>'Festivals, events and seasonal food, month by month.'}],
+ ['animals','Wildlife by animal','paw-print',p=>/(^| )w[a-z]/.test(p.tg),{subs:ANIMALS.map(([k,l])=>[k,l,p=>has(p,'w'+k)]),desc:()=>'Pick an animal to see where to find it.'}],
  ['wonders','Ancient wonders','castle',p=>p.c==='H'&&/ancient|ruin|temple|pyramid|roman|maya|inca|greek|tomb|empire|kingdom|citadel|wonder|oldest|lost/.test(p.x)],
  ['islands','Island escapes','palmtree',p=>p.c==='B'||/\b(island|islands|atoll|lagoon|cay|cays)\b/.test(p.x)],
  ['wild','Big wildlife','paw-print',p=>p.c==='W'&&/safari|lion|elephant|gorilla|tiger|whale|bear|rhino|penguin|jaguar|leopard|orangutan|shark|manta|migration|chimp|big five/.test(p.x)],
@@ -688,13 +720,20 @@ const COLS=[
  ['roads','Road & rail trips','route',p=>/\b(road|highway|drive|railway|train|pass|route|loop|cruise)\b/.test(p.x)],
  ['sacred','Sacred journeys','church',p=>p.c==='S'&&p.t!=='G'||/pilgrim/.test(p.x)],
 ];
+const ucols=()=>xKeys('c|').map(k=>Object.assign({id:k.slice(2)},xGet(k))).sort((a,b)=>(b.c||0)-(a.c||0));
+function colDef(k){if(!k)return null;if(k.startsWith('u:')){const c=xGet('c|'+k.slice(2));if(!c)return null;const ks=new Set(c.p||[]);return{k,l:c.n||'My collection',i:'star',pred:p=>ks.has(K(p)),o:{user:1,desc:()=>(c.p||[]).length?'Your own collection. Add places from any place page.':'Empty so far. Open any place and tap Save to collection.'}}}
+ const c=COLS.find(c=>c[0]===k);return c?{k,l:c[1],i:c[2],pred:c[3],o:c[4]||{}}:null}
+let colCur=null;
+function colBuild(){const d=colDef(st.col);if(!d){st.col='';return null}
+ let base=(!d.o.dyn&&!d.o.user&&colSet[d.k])||P.filter(d.pred);if(base instanceof Set)base=[...base];
+ const sb=d.o.subs&&st.sub?d.o.subs.find(x=>x[0]===st.sub):null;return new Set(sb?base.filter(sb[2]):base)}
 function months(s){s=s.toLowerCase();if(/year|monthly|twice/.test(s))return 4095;let m=0;if(/summer/.test(s))m|=0b11100000;
  for(const part of s.split(',')){const t=[...part.matchAll(/jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec/g)].map(x=>MON.map(v=>v.toLowerCase()).indexOf(x[0]));
   if(t.length>=2&&/[–-]/.test(part)){let a=t[0],b=t[t.length-1];for(let i=a;;i=(i+1)%12){m|=1<<i;if(i===b)break}}else t.forEach(i=>m|=1<<i)}
  return m||4095}
 
 let P=[],F=[],G=null,shown=0,winStart=0,cur=null;
-const st={q:'',ct:'',co:'',c:'',t:'',m:-1,col:'',l:'',fl:''};
+const st={q:'',ct:'',co:'',c:'',t:'',m:-1,col:'',sub:'',l:'',fl:''};
 let viewMode='grid',sortMode='recommended';
 let marks={};
 try{marks=JSON.parse(localStorage.getItem('atlas10k-marks')||'{}');const old=JSON.parse(localStorage.getItem('atlas5k')||'[]');old.forEach(k=>{if(!marks[k])marks[k]='w'})}catch(e){}
@@ -705,9 +744,11 @@ const buzz=()=>{try{navigator.vibrate&&navigator.vibrate(10)}catch(e){}};
 
 /* ---------- filtering ---------- */
 let colSet={},countryTotals=new Map();
-function base(p,skipCo){const q=st.q;return(!st.ct||p.ct===st.ct)&&(skipCo||!st.co||p.iso===st.co)&&(!st.c||p.c===st.c)&&(!st.t||p.t===st.t)&&(st.m<0||(p.mo>>st.m)&1)&&(!st.col||colSet[st.col].has(p))&&(!st.l||marks[K(p)]===st.l)&&(!q||p.s_.includes(q))&&(!st.fl||(()=>{const d=fromHome(p);return!!d&&d.h<=+st.fl})())}
+function base(p,skipCo){const q=st.q;return(!st.ct||p.ct===st.ct)&&(skipCo||!st.co||p.iso===st.co)&&(!st.c||p.c===st.c)&&(!st.t||p.t===st.t)&&(st.m<0||(p.mo>>st.m)&1)&&(!st.col||!colCur||colCur.has(p))&&(!st.l||marks[K(p)]===st.l)&&(!q||p.s_.includes(q))&&(!st.fl||(()=>{const d=fromHome(p);return!!d&&d.h<=+st.fl})())}
 function apply(scroll){
+ colCur=st.col?colBuild():null;
  F=P.filter(p=>base(p,false));
+ {const d=colDef(st.col);if(d&&d.o.sort&&sortMode==='recommended')F.sort(d.o.sort)}
  if(sortMode==='az')F.sort((a,b)=>a.co.localeCompare(b.co)||a.n.localeCompare(b.n));
  else if(sortMode==='za')F.sort((a,b)=>a.co.localeCompare(b.co)||b.n.localeCompare(a.n));
  else if(sortMode==='near')F.sort((a,b)=>{const x=fromHome(a),y=fromHome(b);return(x?x.km:1e9)-(y?y.km:1e9)});
@@ -722,22 +763,32 @@ function ring(){const A=P.filter(p=>p.iso===st.co&&p.t!=='G'),b=A.filter(p=>mark
  return `<div class="ring"><svg viewBox="0 0 52 52"><circle class="bg" cx="26" cy="26" r="21"/><circle class="fg" cx="26" cy="26" r="21" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-b/n)}"/></svg><div><b>${b} of ${A.length}</b><span>Legendary & Iconic visited</span></div></div>`}
 function head(){
  const co=st.co?P.find(p=>p.iso===st.co):null;
- $('lt').textContent=co?co.co:st.col?COLS.find(c=>c[0]===st.col)[1]:st.l==='w'?'Want to go':st.l==='b'?'Been there':'All places';
+ $('lt').textContent=co?co.co:st.col&&colDef(st.col)?colDef(st.col).l:st.l==='w'?'Want to go':st.l==='b'?'Been there':'All places';
  const cn=new Set(F.map(p=>p.iso)).size,L=F.filter(p=>p.t==='L').length;
  $('ls').textContent=`${F.length.toLocaleString()} places${co?' · '+CONT[co.ct]:` in ${cn} countries`}${L?` · ${L} Legendary`:''}`;
  const a=[];
- if(st.ct)a.push(['ct',CONT[st.ct]]);if(st.c)a.push(['c',CAT[st.c][0]]);if(st.t)a.push(['t',TIER[st.t]]);if(st.m>=0)a.push(['m','Best in '+MON[st.m]]);if(st.col)a.push(['col',COLS.find(c=>c[0]===st.col)[1]]);if(st.l)a.push(['l',st.l==='w'?'Want to go':'Been there']);if(st.q)a.push(['q','“'+st.q+'”']);
+ if(st.ct)a.push(['ct',CONT[st.ct]]);if(st.c)a.push(['c',CAT[st.c][0]]);if(st.t)a.push(['t',TIER[st.t]]);if(st.m>=0)a.push(['m','Best in '+MON[st.m]]);if(st.col&&colDef(st.col)){const d=colDef(st.col),sb=d.o.subs&&st.sub?d.o.subs.find(x=>x[0]===st.sub):null;a.push(['col',d.l+(sb?' · '+sb[1]:'')])}if(st.l)a.push(['l',st.l==='w'?'Want to go':'Been there']);if(st.q)a.push(['q','“'+st.q+'”']);
  $('active').innerHTML=a.map(([k,v])=>`<span class="chip-on">${esc(v)}<button data-k="${k}" aria-label="Remove filter">${ic('x')}</button></span>`).join('');
  const cb=$('cband');
  if(co){const types={};F.forEach(p=>types[p.c]=(types[p.c]||0)+1);const tl=t=>F.filter(p=>p.t===t).length;const f=G.byIso[st.co];let shape='';
   if(f){const sp=d3.geoPath(d3.geoMercator().fitSize([140,110],f));shape=`<svg class="shape" viewBox="0 0 140 110" aria-hidden="true"><path d="${sp(f)}"/></svg>`}
   cb.innerHTML=`<div><div class="tierline"><div><b>${tl('L')}</b><span>Legendary</span></div><div><b>${tl('I')}</b><span>Iconic</span></div><div><b>${tl('G')}</b><span>Gems</span></div></div><div class="types">${Object.entries(types).sort((a,b)=>b[1]-a[1]).map(([c,n])=>`<span style="--tc:${TC[c]}">${ic(CAT[c][1])}${CAT[c][0]} · ${n}</span>`).join('')}</div></div><div class="side">${ring()}${shape}</div>`}
- else cb.innerHTML='';
+ else cb.innerHTML=colBand();
+ {const d=colDef(st.col);$('csub').innerHTML=d&&d.o.subs?[['','All']].concat(d.o.subs).map(([k,l])=>`<button class="chip" data-s="${k}" aria-pressed="${st.sub===k}">${esc(l)}</button>`).join(''):''}
  qchips();tbarUI();railUI();
  const pill=$('pill');if(co){pill.classList.add('on');$('pn').textContent=co.co;$('pc').textContent=(counts.get(st.co)||0)+' places';$('hint').style.display='none'}else{pill.classList.remove('on');$('hint').style.display=''}
  document.querySelectorAll('.col').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===st.col));$('lgb').hidden=!beenIso.size;
 }
-$('active').onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k;if(k==='q'){st.q='';$('q').value=''}else st[k]=k==='m'?-1:'';apply()};
+$('active').onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k;if(k==='q'){st.q='';$('q').value=''}else{st[k]=k==='m'?-1:'';if(k==='col')st.sub=''}apply()};
+$('csub').onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;st.sub=b.dataset.s;buzz();apply()};
+function colBand(){const d=colDef(st.col);if(!d)return'';const desc=d.o.desc?d.o.desc():'';let x='';
+ if(d.o.band==='legend'){const A=P.filter(p=>p.t==='L'),b=A.filter(p=>marks[K(p)]==='b').length,w=A.filter(p=>marks[K(p)]==='w').length;
+  return`<div><div class="tierline"><div><b>${b}</b><span>Been</span></div><div><b>${w}</b><span>Want to go</span></div><div><b>${A.length-b}</b><span>To go</span></div></div><div class="cnote">Your bucket list of the world's top places.</div><div class="cprog"><i style="width:${(b/(A.length||1)*100).toFixed(1)}%"></i></div></div>`}
+ if(d.o.user)x=`<div class="cact"><button class="btn" type="button" data-ca="ren">${ic('pencil')}Rename</button><button class="btn" type="button" data-ca="del">${ic('trash-2')}Delete</button></div>`;
+ return`<div><div class="cnote">${esc(desc)}</div>${x}</div>`}
+$('cband').addEventListener('click',e=>{const b=e.target.closest('[data-ca]');if(!b||!st.col.startsWith('u:'))return;const id=st.col.slice(2),c=xGet('c|'+id);if(!c)return;
+ if(b.dataset.ca==='ren'){const n=prompt('Rename collection',c.n||'');if(n&&n.trim()){xSet('c|'+id,Object.assign({},c,{n:n.trim().slice(0,60)}));renderCols();apply()}}
+ else if(confirm(`Delete “${c.n}”? The places stay in your atlas.`)){xSet('c|'+id,null);st.col='';renderCols();apply()}});
 function dock(){const n=['co','ct','c','t','l'].filter(k=>st[k]).length;$('bfn').textContent=n;$('bfn').classList.toggle('on',n>0);
  $('bml').textContent=st.m>=0?MON[st.m]:'When';$('bm').setAttribute('aria-pressed',st.m>=0);
  const w=Object.values(marks).length;$('btn').textContent=w;$('btn').classList.toggle('on',w>0)}
@@ -747,7 +798,7 @@ const NOW=new Date().getMonth();
 const QC=[['t','L','Legendary','crown'],['m',NOW,'In season now','calendar'],['c','B','Beaches','palmtree'],['c','M','Mountains','mountain-snow'],['c','W','Wildlife','paw-print'],['c','H','Heritage','castle'],['l','w','Want to go','heart']];
 function qchips(){$('qc').innerHTML=QC.map(([k,v,l,i],n)=>`<button class="chip" data-n="${n}" aria-pressed="${st[k]===v}">${ic(i)}${l}</button>`).join('')}
 $('qc').onclick=e=>{const b=e.target.closest('button');if(!b)return;const [k,v]=QC[+b.dataset.n];st[k]=st[k]===v?(k==='m'?-1:''):v;buzz();apply()};
-document.addEventListener('click',e=>{if(e.target.closest('#clearAll')){Object.assign(st,{q:'',ct:'',co:'',c:'',t:'',m:-1,col:'',l:'',fl:''});$('q').value='';apply()}});
+document.addEventListener('click',e=>{if(e.target.closest('#clearAll')){Object.assign(st,{q:'',ct:'',co:'',c:'',t:'',m:-1,col:'',sub:'',l:'',fl:''});$('q').value='';apply()}});
 /* ---------- dock shrink ---------- */
 {let ly=scrollY,tm;const dk=document.querySelector('.dock');
  addEventListener('scroll',()=>{const y=scrollY;if(document.activeElement===$('q')||st.q){dk.classList.remove('mini')}else if(y>ly+8&&y>500)dk.classList.add('mini');else if(y<ly-8)dk.classList.remove('mini');ly=y;clearTimeout(tm);tm=setTimeout(()=>dk.classList.remove('mini'),1200)},{passive:true});
@@ -796,7 +847,7 @@ async function hardRefresh(){
    await Promise.all(names.map(n=>caches.delete(n)));
   }
  }catch(e){console.warn('App cache cleanup was incomplete:',e)}
- try{await Promise.all(['index.html','geo.json','sw.js','manifest.json'].map(f=>fetch(f,{cache:'reload'}).catch(()=>{})))}catch(e){}
+ try{await Promise.all(['index.html','geo.json','tags.json','sw.js','manifest.json'].map(f=>fetch(f,{cache:'reload'}).catch(()=>{})))}catch(e){}
  const u=new URL(location.href);u.search='';u.searchParams.set('_fresh',Date.now().toString());
  location.replace(u.href);
 }
@@ -1219,13 +1270,13 @@ function syncMarks(u){
  if(dirty)push()}
 function marksChanged(){if(!P.length)return;markCounts=null;refreshBeen();dock();draw();
  document.querySelectorAll('#list .card').forEach(c=>{const p=P[+c.dataset.i];if(p)c.outerHTML=card(p)});
- if(st.co)head();if($('dd').open&&cur)marksUI()}
+ if(st.co||st.col==='legend')head();if($('ck').open)ckRender();if($('dd').open&&cur)marksUI()}
 /* ================= synced personal store (home, trips, journal) ================= */
 let XS={};try{XS=JSON.parse(localStorage.getItem('atlas10k-x')||'{}')}catch(_){}
 const xGet=k=>XS[k]&&XS[k][0]!=null?XS[k][0]:undefined;
 function xSet(k,v){XS[k]=[v==null?null:v,Date.now()];try{localStorage.setItem('atlas10k-x',JSON.stringify(XS))}catch(_){}if(window.__pushX)window.__pushX()}
 const xKeys=pre=>Object.keys(XS).filter(k=>k.startsWith(pre)&&XS[k][0]!=null);
-function xChanged(){distVer++;try{if($('tp').open)renderTrips();if($('dd').open&&cur){rowsUI(cur);journalUI(cur)}if($('ts').open)travels();if(st.fl||sortMode==='near')apply()}catch(e){reportErr(e)}}
+function xChanged(){distVer++;try{if($('tp').open)renderTrips();if($('dd').open&&cur){rowsUI(cur);journalUI(cur)}if($('ts').open)travels();if(st.fl||sortMode==='near'||(st.col&&(st.col.startsWith('u:')||(colDef(st.col)||{o:{}}).o.dyn)))apply();renderCols()}catch(e){reportErr(e)}}
 
 /* ================= home city, distance and travel time ================= */
 const HOMES=[['Bengaluru',12.97,77.59],['Mumbai',19.08,72.88],['Delhi',28.61,77.21],['Chennai',13.08,80.27],['Hyderabad',17.39,78.49],['Kolkata',22.57,88.36],['Pune',18.52,73.86],['Ahmedabad',23.02,72.57],['Kochi',9.93,76.27],['Goa',15.38,73.83],['Jaipur',26.91,75.79],['Lucknow',26.85,80.95],['Chandigarh',30.73,76.78],['Guwahati',26.14,91.74],['Thiruvananthapuram',8.52,76.94],['Bhubaneswar',20.30,85.82],['Indore',22.72,75.86],['Nagpur',21.15,79.09],['Coimbatore',11.02,76.96],['Mangaluru',12.91,74.86],['Visakhapatnam',17.69,83.22],['Patna',25.59,85.14],['Varanasi',25.32,82.97],['Srinagar',34.08,74.80]];
@@ -1358,6 +1409,39 @@ function openAddTrip(p){const T=trips(),k=K(p);
  $('at').showModal()}
 
 $('dtrip').onclick=()=>{if(cur)openAddTrip(cur)};
+function renderCols(){if(!P.length)return;const U=ucols();
+ const cnt=c=>c[4]&&c[4].dyn?P.filter(c[3]).length:colSet[c[0]].size;
+ const card=(k,i,l,n,cls='')=>`<button class="col${cls}" data-k="${k}" aria-pressed="${st.col===k}"><span class="ic">${ic(i)}</span><span><b>${esc(l)}</b><span>${n}</span></span></button>`;
+ $('cols').innerHTML=U.map(c=>card('u:'+c.id,'star',c.n||'My collection',`${(c.p||[]).length} saved`)).join('')
+  +COLS.slice(0,4).map(c=>card(c[0],c[2],c[1],cnt(c).toLocaleString()+' places')).join('')
+  +card('checklist','circle-check','Country checklists',`${new Set(P.map(p=>p.iso)).size} countries`)
+  +COLS.slice(4).map(c=>card(c[0],c[2],c[1],cnt(c).toLocaleString()+' places')).join('')
+  +card('new','plus','New collection','Your own list',' new')}
+$('cols').onclick=e=>{const b=e.target.closest('.col');if(!b)return;const k=b.dataset.k;buzz();
+ if(k==='checklist'){openChecklist();return}
+ if(k==='new'){const n=prompt('Name your collection','');if(!n||!n.trim())return;const id=Date.now().toString(36);xSet('c|'+id,{n:n.trim().slice(0,60),p:[],c:Date.now()});st.col='u:'+id;st.sub='';renderCols();apply(true);return}
+ if(st.col===k){st.col='';st.sub=''}else{st.col=k;const d=colDef(k);st.sub=d&&d.o.subDefault?d.o.subDefault():''}
+ apply(true)};
+function openAddCol(p){const k=K(p),U=ucols();
+ $('acb').innerHTML=`<p class="tmuted" style="margin-top:0">${esc(p.n)}, ${esc(p.co)}</p>`+U.map(c=>{const on=(c.p||[]).includes(k);return`<button class="trow" data-ac="${c.id}" aria-pressed="${on}"><span class="cic" style="--tc:#e8b04a">${ic(on?'circle-check':'star')}</span><span><b>${esc(c.n||'My collection')}</b><small>${(c.p||[]).length} places${on?' · saved here':''}</small></span></button>`}).join('')
+  +`<div class="acnew"><input id="acn" maxlength="60" placeholder="New collection name" autocomplete="off"><button class="btn pri" type="button" data-ac="new">${ic('plus')}Create</button></div>`;
+ $('acb').onclick=e=>{const b=e.target.closest('[data-ac]');if(!b)return;let id=b.dataset.ac;
+  if(id==='new'){const n=$('acn').value.trim();if(!n){$('acn').focus();return}id=Date.now().toString(36);xSet('c|'+id,{n:n.slice(0,60),p:[k],c:Date.now()})}
+  else{const c=xGet('c|'+id);const ps=c.p||[];xSet('c|'+id,Object.assign({},c,{p:ps.includes(k)?ps.filter(x=>x!==k):[...ps,k]}))}
+  buzz();renderCols();if(st.col==='u:'+id)apply();openAddCol(p)};
+ $('ac').showModal()}
+$('dcol').onclick=()=>{if(cur)openAddCol(cur)};
+let ckMode='all';
+function openChecklist(){ckRender();$('ck').showModal()}
+function ckRender(){const m=new Map();P.forEach(p=>{const c=m.get(p.iso)||{iso:p.iso,n:p.co,t:0,b:0,w:0};c.t++;const k=marks[K(p)];if(k==='b')c.b++;else if(k==='w')c.w++;m.set(p.iso,c)});
+ let L=[...m.values()];const started=L.filter(c=>c.b).length,done=L.filter(c=>c.b===c.t).length;
+ if(ckMode==='started')L=L.filter(c=>c.b);else if(ckMode==='want')L=L.filter(c=>c.w&&!c.b);
+ L.sort((a,b)=>b.b/b.t-a.b/a.t||b.b-a.b||b.t-a.t||a.n.localeCompare(b.n));
+ $('ckf').innerHTML=[['all','All countries'],['started','Started'],['want','Want to start']].map(([k,l])=>`<button class="chip" data-m="${k}" aria-pressed="${ckMode===k}">${l}</button>`).join('');
+ $('cks').textContent=`You've been to places in ${started} of ${m.size} countries${done?` · ${done} fully done`:''}. Tap a country to work through it.`;
+ $('ckl').innerHTML=L.length?L.map(c=>`<button class="ckrow" data-iso="${c.iso}"><span style="font-size:20px">${flagFor(c.iso)}</span><span><b>${esc(c.n)}</b><small>${c.b} of ${c.t} been${c.w?` · ${c.w} want to go`:''}</small><div class="cprog"><i style="width:${(c.b/c.t*100).toFixed(1)}%"></i></div></span><em>${Math.round(c.b/c.t*100)}%</em></button>`).join(''):'<p class="tmuted">Nothing here yet. Mark places as Want to go or Been here.</p>'}
+$('ckf').onclick=e=>{const b=e.target.closest('[data-m]');if(!b)return;ckMode=b.dataset.m;ckRender()};
+$('ckl').onclick=e=>{const b=e.target.closest('[data-iso]');if(!b)return;$('ck').close();st.co=b.dataset.iso;st.col='';st.sub='';flyTo(st.co);apply(true)};
 window.__T={get P(){return P},get F(){return F},st,openP,openTrips,trips,xGet,xSet,fromHome,K,apply,save,get marks(){return marks},set sort(v){sortMode=v},bump(){distVer++}};
 /* ---------- backup & restore ---------- */
 function backupData(){let mt={};try{mt=JSON.parse(localStorage.getItem('atlas10k-mt')||'{}')}catch(_){}
@@ -1379,20 +1463,19 @@ $('bkUp').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)r
   msg.textContent='Restored. Reloading…';setTimeout(()=>location.reload(),900)
  }catch(err){msg.textContent=(err&&err.code==='permission-denied')?'Your database refused the restore. Check that you are signed in.':'Could not restore: '+(err.message||err)}};
 function startApp(u){window.__uid=u.uid;
-Promise.all([loadPlaces(),fetch('geo.json').then(r=>r.json())]).then(([d,g])=>{
+Promise.all([loadPlaces(),fetch('geo.json').then(r=>r.json()),fetch('tags.json').then(r=>r.ok?r.json():{}).catch(()=>({}))]).then(([d,g,tg])=>{TAGS=tg||{};
  authEl.hidden=true;document.body.classList.remove('locked');
  const ord={AS:0,EU:1,AF:2,NA:3,SA:4,OC:5,AN:6};
  P=d.map(a=>({n:a[0],c:a[1],t:a[2],h:a[3],s:a[4],co:a[5],ct:a[6],iso:a[7]}));
  const cc={};P.forEach(p=>cc[p.co]=(cc[p.co]||0)+1);const to={L:0,I:1,G:2};P.forEach((p,i)=>p.i0=i);
  P.sort((a,b)=>ord[a.ct]-ord[b.ct]||cc[b.co]-cc[a.co]||a.co.localeCompare(b.co)||to[a.t]-to[b.t]||a.i0-b.i0);
- PK=new Map(P.map(p=>[K(p),p]));P.forEach((p,i)=>{p.i=i;p.x=(p.n+' '+p.h).toLowerCase();p.s_=(p.n+' '+p.co+' '+CONT[p.ct]+' '+p.h+' '+CAT[p.c][0]).toLowerCase();p.mo=months(p.s)});
- COLS.forEach(c=>colSet[c[0]]=new Set(P.filter(c[3])));
+ PK=new Map(P.map(p=>[K(p),p]));P.forEach((p,i)=>{p.i=i;p.x=(p.n+' '+p.h).toLowerCase();p.s_=(p.n+' '+p.co+' '+CONT[p.ct]+' '+p.h+' '+CAT[p.c][0]).toLowerCase();p.mo=months(p.s);p.tg=TAGS[hk(K(p))]||''});
+ COLS.forEach(c=>{if(!(c[4]&&c[4].dyn))colSet[c[0]]=new Set(P.filter(c[3]))});
  {const m=new Map();P.forEach(p=>{const c=m.get(p.iso)||{iso:p.iso,n:p.co,ct:p.ct,k:0};c.k++;m.set(p.iso,c)});CL=[...m.values()].sort((a,b)=>a.n.localeCompare(b.n));countryNameByIso=new Map(CL.map(c=>[c.iso,c.n]));countryFilters();}
  G={f:g.f.map(f=>({type:'Feature',i:f.i,geometry:{type:f.t,coordinates:f.c}})),d:g.d,c:g.c};G.byIso={};G.f.forEach(f=>{if(f.i)G.byIso[f.i]=f});
  const cn=new Set(P.map(p=>p.iso)).size,tc=t=>P.filter(p=>p.t===t).length;
  $('stats').innerHTML=`<div><b>${P.length.toLocaleString()}</b><span>places</span></div><div><b>${cn}</b><span>countries & territories</span></div><div><b>${tc('L')}</b><span>Legendary</span></div>`;
- $('cols').innerHTML=COLS.map(c=>`<button class="col" data-k="${c[0]}" aria-pressed="false"><span class="ic">${ic(c[2])}</span><span><b>${c[1]}</b><span>${colSet[c[0]].size.toLocaleString()} places</span></span></button>`).join('');
- $('cols').onclick=e=>{const b=e.target.closest('.col');if(!b)return;st.col=st.col===b.dataset.k?'':b.dataset.k;apply(true)};
+ renderCols();
  refreshBeen();size();apply();startSpin();syncMarks(u);setTimeout(()=>geocode().catch(reportErr),4000);
 }).catch(err=>{started=false;showForm((err&&err.code==='permission-denied')?'Your database is locked. Paste the security rules in Firebase, then try again.':'Could not load your atlas. '+nice(err),'err')});
 }
