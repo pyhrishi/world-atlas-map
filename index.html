@@ -1110,9 +1110,9 @@ else{
   if(em){fbAuth.signInWithEmailLink(em,location.href).then(()=>history.replaceState(null,'',location.pathname)).catch(err=>showForm(nice(err),'err'))}
   else{$('aPwL').hidden=true;showForm('Confirm your email to finish signing in.')}}
  fbAuth.onAuthStateChanged(u=>{
-  if(u&&(u.email||'').toLowerCase()===OWNER){if(!started){started=true;showLoad('Opening your atlas…');startApp(u)}}
-  else if(u){denied=true;fbAuth.signOut();showForm('This account does not have access.','err')}
-  else if(denied){denied=false;history.replaceState(null,'',location.pathname);showForm('This account does not have access.','err')}
+  if(u&&(u.email||'').trim().toLowerCase()===OWNER){if(!started){started=true;showLoad('Opening your atlas…');startApp(u)}}
+  else if(u){denied=(u.email||'(no email on this account)');fbAuth.signOut();showForm('Signed in as '+denied+', which does not have access.','err')}
+  else if(denied){const d=denied;denied=false;history.replaceState(null,'',location.pathname);showForm('Signed in as '+d+', which does not have access.','err')}
   else if(!fbAuth.isSignInWithEmailLink(location.href)||!localStorage.getItem('atlas10k-email'))showForm('')});
 }
 async function loadPlaces(){
