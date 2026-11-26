@@ -327,7 +327,7 @@ input:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(-
 .qa [aria-pressed=true][data-k=w]{color:var(--acc)}.qa [aria-pressed=true][data-k=b]{color:var(--been)}
 .card.lp{transform:scale(.97);border-color:#5a6069}
 /* jump rail */
-.rail{position:fixed;right:6px;top:50%;transform:translateY(-50%);z-index:17;display:none;flex-direction:column;gap:2px;padding:6px 4px;border-radius:16px;background:#1b1d21f2;border:1px solid var(--line);touch-action:pan-y;contain:layout paint;will-change:opacity,transform}
+.rail{position:fixed;right:6px;top:50%;transform:translateY(-50%);z-index:17;display:none;flex-direction:column;gap:2px;padding:6px 4px;border-radius:16px;background:#1b1d21f2;border:1px solid var(--line);touch-action:none;contain:layout paint;will-change:opacity,transform}
 .rail.on{display:flex;opacity:0;pointer-events:none;transition:opacity .16s ease,transform .16s ease}
 .rail.on.show,.rail.on:hover{opacity:1;pointer-events:auto}
 .rail button{all:unset;cursor:pointer;font:600 11px Inter,sans-serif;color:var(--dim);width:30px;height:32px;display:grid;place-items:center;border-radius:10px;transition:background-color .12s ease,color .12s ease;touch-action:manipulation}
