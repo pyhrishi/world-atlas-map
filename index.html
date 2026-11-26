@@ -155,6 +155,14 @@ h1 em{color:var(--mute)}
 .cprog{height:8px;border-radius:8px;background:var(--s3);overflow:hidden;margin-top:12px;max-width:340px}.cprog i{display:block;height:100%;background:var(--been,#5fbf8f)}
 .cact{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.cact .btn{min-height:38px;font-size:13px}
 .col.new{border-style:dashed;background:transparent}
+.gn{margin:6px 0 26px}.gnl{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.gnr{all:unset;box-sizing:border-box;display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border-radius:16px;background:var(--s1);border:1px solid var(--line);cursor:pointer}
+.gnr b{display:block;font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gnr small{display:block;color:var(--dim);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gnr .tag{font-size:11px;border-radius:10px;padding:3px 8px;background:var(--s3);color:#d5d8dd;white-space:nowrap}.gnr .tag.w{background:#3a2a26;color:#ffb39e}
+.lws{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:6px;margin-top:12px}.lws::-webkit-scrollbar{display:none}
+.lw{all:unset;box-sizing:border-box;flex:none;width:190px;padding:14px;border-radius:var(--r);border:1px solid var(--line);background:linear-gradient(160deg,var(--s2),var(--s1));cursor:pointer}
+.lw[aria-pressed=true]{border-color:var(--acc)}.lw b{display:block;font:400 26px/1 "Instrument Serif",serif}.lw strong{display:block;font-weight:600;font-size:14px;margin-top:8px}.lw small{display:block;color:var(--mute);font-size:12px;margin-top:4px;line-height:1.4}
+.gnx{font-size:12px;color:var(--dim);margin-top:8px}
 .ckrow{all:unset;box-sizing:border-box;display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;padding:10px 12px;border-radius:14px;background:var(--s2);border:1px solid var(--line);margin-bottom:6px;cursor:pointer}
 .ckrow b{display:block;font-weight:600;font-size:14px}.ckrow small{color:var(--dim);font-size:12px}.ckrow .cprog{margin-top:6px;height:5px}
 .ckrow em{font-style:normal;font-variant-numeric:tabular-nums;color:var(--mute);font-size:13px}
@@ -591,6 +599,8 @@ body.locked{overflow:hidden}
 </section>
 
 <div class="wrap">
+ <section class="gn" id="gn"><div class="sec-h"><h2>Go next</h2><p id="gns">In season now, nearest first</p></div><div class="gnl" id="gnl"></div></section>
+ <section class="gn" id="lwsec"><div class="sec-h"><h2>Long weekends</h2><p>Tap one for places that fit the days and the season</p></div><div class="lws" id="lws"></div><p class="gnx">Expected Karnataka holiday dates. The official 2027 list isn't out yet, so check before booking.</p></section>
  <div class="sec-h"><h2>Collections</h2><p>Tap one to filter the list and the globe</p></div>
  <div class="cols" id="cols"></div>
  <div class="lhead"><div class="lhead-main"><div><h2 id="lt">All places</h2><p id="ls"></p></div><div class="view-group inline-view" role="group" aria-label="Destination layout"><button type="button" data-view="grid" aria-pressed="true">Cards</button><button type="button" data-view="list" aria-pressed="false">List</button></div></div><div class="chips-on" id="active"></div><div class="chips csub" id="csub"></div></div>
@@ -721,9 +731,42 @@ const COLS=[
  ['sacred','Sacred journeys','church',p=>p.c==='S'&&p.t!=='G'||/pilgrim/.test(p.x)],
 ];
 const ucols=()=>xKeys('c|').map(k=>Object.assign({id:k.slice(2)},xGet(k))).sort((a,b)=>(b.c||0)-(a.c||0));
-function colDef(k){if(!k)return null;if(k.startsWith('u:')){const c=xGet('c|'+k.slice(2));if(!c)return null;const ks=new Set(c.p||[]);return{k,l:c.n||'My collection',i:'star',pred:p=>ks.has(K(p)),o:{user:1,desc:()=>(c.p||[]).length?'Your own collection. Add places from any place page.':'Empty so far. Open any place and tap Save to collection.'}}}
+function colDef(k){if(!k)return null;
+ if(k.startsWith('lw:')){const w=longWeekends().find(w=>'lw:'+w.id===k);if(!w)return null;return{k,l:`${w.name} · ${w.days} days`,i:'calendar',pred:p=>lwFit(p,w),o:{dyn:1,sort:lwSort,desc:()=>`${fmtD(w.a)} to ${fmtD(w.b)}${w.leave?`, taking ${fmtD(w.leave)} off`:''}. Places in season in ${MON[w.a.getMonth()]}, within about ${LWMAX[w.days]||10} hours of ${home()[0]}, your Want to go list first. Places you've been are left out.`}}}if(k.startsWith('u:')){const c=xGet('c|'+k.slice(2));if(!c)return null;const ks=new Set(c.p||[]);return{k,l:c.n||'My collection',i:'star',pred:p=>ks.has(K(p)),o:{user:1,desc:()=>(c.p||[]).length?'Your own collection. Add places from any place page.':'Empty so far. Open any place and tap Save to collection.'}}}
  const c=COLS.find(c=>c[0]===k);return c?{k,l:c[1],i:c[2],pred:c[3],o:c[4]||{}}:null}
 let colCur=null;
+/* ---------- long weekends ---------- */
+const HOLS=[['2026-12-25','Christmas'],['2027-01-01','New Year (many offices)'],['2027-01-15','Sankranti'],['2027-01-26','Republic Day'],['2027-03-10','Ramzan'],['2027-03-26','Good Friday'],['2027-04-07','Ugadi'],['2027-04-14','Ambedkar Jayanti'],['2027-05-17','Bakrid'],['2027-06-16','Muharram'],['2027-09-29','Mahalaya'],['2027-10-15','Valmiki Jayanti'],['2027-10-28','Naraka Chaturdashi'],['2027-11-01','Rajyotsava'],['2027-11-16','Kanakadasa Jayanti']];
+const dKey=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const dOf=k=>{const[a,b,c]=k.split('-').map(Number);return new Date(a,b-1,c)};
+const fmtD=d=>d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+function longWeekends(){const hol=new Map(HOLS.filter(h=>!/bridge/.test(h[1])).map(h=>[h[0],h[1]]));const off=d=>d.getDay()===0||d.getDay()===6||hol.has(dKey(d));
+ const today=new Date();today.setHours(0,0,0,0);const out=[],seen=new Set();
+ for(const[k,name]of HOLS){const h=dOf(k);if(h<today||h.getDay()===0||h.getDay()===6)continue;
+  let a=new Date(h),b=new Date(h);while(off(new Date(a.getTime()-864e5)))a=new Date(a.getTime()-864e5);while(off(new Date(b.getTime()+864e5)))b=new Date(b.getTime()+864e5);
+  let leave=null;const wd=h.getDay();
+  if(/bridge/.test(name)){continue}
+  if(wd===2){leave=new Date(h.getTime()-864e5);a=new Date(a.getTime()-864e5*1);while(off(new Date(a.getTime()-864e5)))a=new Date(a.getTime()-864e5)}
+  else if(wd===4){leave=new Date(h.getTime()+864e5);b=new Date(b.getTime()+864e5);while(off(new Date(b.getTime()+864e5)))b=new Date(b.getTime()+864e5)}
+  const days=Math.round((b-a)/864e5)+1;if(days<3)continue;const id=dKey(a);if(seen.has(id))continue;seen.add(id);
+  out.push({id,a,b,days,name,leave})}
+ return out.filter(w=>!out.some(o=>o!==w&&o.a<=w.a&&o.b>=w.b&&(o.days>w.days||o.a<w.a)))}
+const LWMAX={3:4.5,4:6,5:8};
+function lwFit(p,w){const d=fromHome(p);if(!d)return false;return d.h<=(LWMAX[w.days]||10)&&((p.mo>>w.a.getMonth())&1)&&marks[K(p)]!=='b'}
+const lwSort=(a,b)=>(marks[K(b)]==='w')-(marks[K(a)]==='w')||'LIG'.indexOf(a.t)-'LIG'.indexOf(b.t)||nearSort(a,b);
+function lwRender(){const L=longWeekends();$('lwsec').hidden=!L.length;
+ $('lws').innerHTML=L.map(w=>`<button class="lw" data-lw="${w.id}" aria-pressed="${st.col==='lw:'+w.id}"><b>${w.days} days</b><strong>${esc(w.name)}</strong><small>${fmtD(w.a)} – ${fmtD(w.b)}${w.leave?`<br>Take ${fmtD(w.leave)} off`:'<br>No leave needed'}</small></button>`).join('')}
+/* ---------- go next ---------- */
+function goNext(){const inS=p=>(p.mo>>NOW)&1,ok=p=>marks[K(p)]!=='b'&&inS(p)&&fromHome(p);
+ const want=P.filter(p=>marks[K(p)]==='w'&&ok(p)).sort((a,b)=>(b.mo!==4095)-(a.mo!==4095)||nearSort(a,b));
+ const fill=P.filter(p=>p.t!=='G'&&p.mo!==4095&&ok(p)&&marks[K(p)]!=='w').sort(nearSort);
+ return want.slice(0,5).concat(fill.slice(0,Math.max(0,5-Math.min(5,want.length))))}
+function gnRender(){if(!P.length)return;const L=goNext();$('gn').hidden=!L.length;
+ const nw=L.filter(p=>marks[K(p)]==='w').length;
+ $('gns').textContent=nw?`${nw===L.length?'From your Want to go list':'Your Want to go picks first, then top places'}, in season in ${MON[NOW]}, nearest to ${home()[0]}`:`Top places in season in ${MON[NOW]}, nearest to ${home()[0]}. Mark places as Want to go to see yours here.`;
+ $('gnl').innerHTML=L.map(p=>{const d=fromHome(p);return`<button class="gnr" data-i="${p.i}">${cic(p.c)}<span><b>${esc(p.n)}</b><small>${esc(p.co)} · ${esc(travelText(d))}</small></span><span class="tag${marks[K(p)]==='w'?' w':''}">${marks[K(p)]==='w'?'Want to go':TIER[p.t]}</span></button>`}).join('')}
+$('gnl').onclick=e=>{const b=e.target.closest('[data-i]');if(b)openP(P[+b.dataset.i])};
+$('lws').onclick=e=>{const b=e.target.closest('[data-lw]');if(!b)return;buzz();const k='lw:'+b.dataset.lw;if(st.col===k){st.col=''}else{st.col=k}st.sub='';lwRender();apply(true)};
 function colBuild(){const d=colDef(st.col);if(!d){st.col='';return null}
  let base=(!d.o.dyn&&!d.o.user&&colSet[d.k])||P.filter(d.pred);if(base instanceof Set)base=[...base];
  const sb=d.o.subs&&st.sub?d.o.subs.find(x=>x[0]===st.sub):null;return new Set(sb?base.filter(sb[2]):base)}
@@ -777,7 +820,7 @@ function head(){
  {const d=colDef(st.col);$('csub').innerHTML=d&&d.o.subs?[['','All']].concat(d.o.subs).map(([k,l])=>`<button class="chip" data-s="${k}" aria-pressed="${st.sub===k}">${esc(l)}</button>`).join(''):''}
  qchips();tbarUI();railUI();
  const pill=$('pill');if(co){pill.classList.add('on');$('pn').textContent=co.co;$('pc').textContent=(counts.get(st.co)||0)+' places';$('hint').style.display='none'}else{pill.classList.remove('on');$('hint').style.display=''}
- document.querySelectorAll('.col').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===st.col));$('lgb').hidden=!beenIso.size;
+ document.querySelectorAll('.col').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===st.col));document.querySelectorAll('.lw').forEach(b=>b.setAttribute('aria-pressed','lw:'+b.dataset.lw===st.col));$('lgb').hidden=!beenIso.size;
 }
 $('active').onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k;if(k==='q'){st.q='';$('q').value=''}else{st[k]=k==='m'?-1:'';if(k==='col')st.sub=''}apply()};
 $('csub').onclick=e=>{const b=e.target.closest('[data-s]');if(!b)return;st.sub=b.dataset.s;buzz();apply()};
@@ -1270,13 +1313,13 @@ function syncMarks(u){
  if(dirty)push()}
 function marksChanged(){if(!P.length)return;markCounts=null;refreshBeen();dock();draw();
  document.querySelectorAll('#list .card').forEach(c=>{const p=P[+c.dataset.i];if(p)c.outerHTML=card(p)});
- if(st.co||st.col==='legend')head();if($('ck').open)ckRender();if($('dd').open&&cur)marksUI()}
+ gnRender();if(st.co||st.col==='legend')head();if($('ck').open)ckRender();if($('dd').open&&cur)marksUI()}
 /* ================= synced personal store (home, trips, journal) ================= */
 let XS={};try{XS=JSON.parse(localStorage.getItem('atlas10k-x')||'{}')}catch(_){}
 const xGet=k=>XS[k]&&XS[k][0]!=null?XS[k][0]:undefined;
 function xSet(k,v){XS[k]=[v==null?null:v,Date.now()];try{localStorage.setItem('atlas10k-x',JSON.stringify(XS))}catch(_){}if(window.__pushX)window.__pushX()}
 const xKeys=pre=>Object.keys(XS).filter(k=>k.startsWith(pre)&&XS[k][0]!=null);
-function xChanged(){distVer++;try{if($('tp').open)renderTrips();if($('dd').open&&cur){rowsUI(cur);journalUI(cur)}if($('ts').open)travels();if(st.fl||sortMode==='near'||(st.col&&(st.col.startsWith('u:')||(colDef(st.col)||{o:{}}).o.dyn)))apply();renderCols()}catch(e){reportErr(e)}}
+function xChanged(){distVer++;try{if($('tp').open)renderTrips();if($('dd').open&&cur){rowsUI(cur);journalUI(cur)}if($('ts').open)travels();if(st.fl||sortMode==='near'||(st.col&&(st.col.startsWith('u:')||(colDef(st.col)||{o:{}}).o.dyn)))apply();renderCols();gnRender()}catch(e){reportErr(e)}}
 
 /* ================= home city, distance and travel time ================= */
 const HOMES=[['Bengaluru',12.97,77.59],['Mumbai',19.08,72.88],['Delhi',28.61,77.21],['Chennai',13.08,80.27],['Hyderabad',17.39,78.49],['Kolkata',22.57,88.36],['Pune',18.52,73.86],['Ahmedabad',23.02,72.57],['Kochi',9.93,76.27],['Goa',15.38,73.83],['Jaipur',26.91,75.79],['Lucknow',26.85,80.95],['Chandigarh',30.73,76.78],['Guwahati',26.14,91.74],['Thiruvananthapuram',8.52,76.94],['Bhubaneswar',20.30,85.82],['Indore',22.72,75.86],['Nagpur',21.15,79.09],['Coimbatore',11.02,76.96],['Mangaluru',12.91,74.86],['Visakhapatnam',17.69,83.22],['Patna',25.59,85.14],['Varanasi',25.32,82.97],['Srinagar',34.08,74.80]];
@@ -1475,7 +1518,7 @@ Promise.all([loadPlaces(),fetch('geo.json').then(r=>r.json()),fetch('tags.json')
  G={f:g.f.map(f=>({type:'Feature',i:f.i,geometry:{type:f.t,coordinates:f.c}})),d:g.d,c:g.c};G.byIso={};G.f.forEach(f=>{if(f.i)G.byIso[f.i]=f});
  const cn=new Set(P.map(p=>p.iso)).size,tc=t=>P.filter(p=>p.t===t).length;
  $('stats').innerHTML=`<div><b>${P.length.toLocaleString()}</b><span>places</span></div><div><b>${cn}</b><span>countries & territories</span></div><div><b>${tc('L')}</b><span>Legendary</span></div>`;
- renderCols();
+ renderCols();gnRender();lwRender();
  refreshBeen();size();apply();startSpin();syncMarks(u);setTimeout(()=>geocode().catch(reportErr),4000);
 }).catch(err=>{started=false;showForm((err&&err.code==='permission-denied')?'Your database is locked. Paste the security rules in Firebase, then try again.':'Could not load your atlas. '+nice(err),'err')});
 }
