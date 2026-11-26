@@ -674,7 +674,7 @@ function photo(p,urgent){const k=K(p);if(!PHOTOS)return Promise.resolve(null);if
 /* about text from Wikipedia */
 let EX={};try{EX=JSON.parse(localStorage.getItem('atlas10k-ex')||'{}')}catch(e){}
 const exSave=()=>{const ks=Object.keys(EX);if(ks.length>400)ks.slice(0,ks.length-400).forEach(k=>delete EX[k]);try{localStorage.setItem('atlas10k-ex',JSON.stringify(EX))}catch(e){}};
-async function about(p){const k=K(p);if(k in EX)return EX[k];const v=await photo(p,true);
+async function about(p){const k=K(p);if(k in EX&&(EX[k]===null||Array.isArray(EX[k])))return EX[k];const v=await photo(p,true);
  const base='https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&redirects=1&prop=extracts&exintro=1&explaintext=1&exsentences=3';
  const u=v&&v[1]?base+'&titles='+encodeURIComponent(v[1]):base+'&generator=search&gsrnamespace=0&gsrlimit=1&gsrsearch='+encodeURIComponent(p.n+' '+p.co);
  const j=await(await fetch(u)).json();const pg=Object.values(j.query?.pages||{})[0];
@@ -982,22 +982,23 @@ function igTags(p){
 /* ---------- detail ---------- */
 function openP(p){
  cur=p;
+ const safe=(f)=>{try{f()}catch(err){reportErr(err)}};
  $('dic').className='cic';$('dic').innerHTML=ic(CAT[p.c][1]);$('dd').style.setProperty('--tc',p.t==='L'?'#ff7a5c':TC[p.c]);
- aboutUI(p);
- $('dpc').classList.remove('hp');$('dpc').style.removeProperty('--ph');photo(p,true).then(v=>{if(cur!==p||!v||!v[0])return;$('dpc').classList.add('hp');$('dpc').style.setProperty('--ph',cssu(v[0]));$('dpc').querySelector('a.src')?.remove();$('dpc').insertAdjacentHTML('beforeend',`<a class="src" href="https://en.wikipedia.org/wiki/${encodeURIComponent(v[1].replace(/ /g,'_'))}" target="_blank" rel="noopener" aria-label="Open on Wikipedia"></a>`)});
- $('dpc').innerHTML=`<svg aria-hidden="true"><defs><pattern id="pp" width="64" height="64" patternUnits="userSpaceOnUse" patternTransform="rotate(-14)"><use href="#i-${CAT[p.c][1]}" x="10" y="10" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><use href="#i-${CAT[p.c][1]}" x="42" y="42" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity=".6"/></pattern></defs><rect width="100%" height="100%" fill="url(#pp)"/></svg>`;
+ safe(()=>aboutUI(p));
+ safe(()=>{$('dpc').classList.remove('hp');$('dpc').style.removeProperty('--ph');photo(p,true).then(v=>{if(cur!==p||!v||!v[0])return;$('dpc').classList.add('hp');$('dpc').style.setProperty('--ph',cssu(v[0]));$('dpc').querySelector('a.src')?.remove();$('dpc').insertAdjacentHTML('beforeend',`<a class="src" href="https://en.wikipedia.org/wiki/${encodeURIComponent(v[1].replace(/ /g,'_'))}" target="_blank" rel="noopener" aria-label="Open on Wikipedia"></a>`)});
+ $('dpc').innerHTML=`<svg aria-hidden="true"><defs><pattern id="pp" width="64" height="64" patternUnits="userSpaceOnUse" patternTransform="rotate(-14)"><use href="#i-${CAT[p.c][1]}" x="10" y="10" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><use href="#i-${CAT[p.c][1]}" x="42" y="42" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity=".6"/></pattern></defs><rect width="100%" height="100%" fill="url(#pp)"/></svg>`;});
  $('dw').innerHTML=`${ic('map-pinned')}${esc(p.co)} · ${CONT[p.ct]}`;$('dn').textContent=p.n;$('dhk').textContent=p.h;
  $('drows').innerHTML=`<div><span>Best time</span><b>${esc(p.s)}</b></div><div><span>Type</span><b>${CAT[p.c][0]}</b></div><div><span>Tier</span><b style="color:${p.t==='L'?'var(--acc)':p.t==='I'?'var(--gold)':'inherit'}">${TIER[p.t]}</b></div>`;
  const q=encodeURIComponent(p.n+', '+p.co);
  $('lm').href='https://www.google.com/maps/search/?api=1&query='+q;$('le').href='https://earth.google.com/web/search/'+q;$('ly').href='https://www.youtube.com/results?search_query='+q;
- const tags=igTags(p);$('li').href='https://www.instagram.com/explore/tags/'+tags[0]+'/';
- $('dig').innerHTML=tags.slice(1).map(t=>`<a href="https://www.instagram.com/explore/tags/${t}/" target="_blank" rel="noopener">#${t}</a>`).join('')+`<a class="g" href="https://www.google.com/search?q=${encodeURIComponent('site:instagram.com "'+p.n+'" '+p.co)}" target="_blank" rel="noopener">${ic('search')}Search posts and reels</a>`;
- marksUI();
+ safe(()=>{const tags=igTags(p);$('li').href='https://www.instagram.com/explore/tags/'+tags[0]+'/';
+ $('dig').innerHTML=tags.slice(1).map(t=>`<a href="https://www.instagram.com/explore/tags/${t}/" target="_blank" rel="noopener">#${t}</a>`).join('')+`<a class="g" href="https://www.google.com/search?q=${encodeURIComponent('site:instagram.com "'+p.n+'" '+p.co)}" target="_blank" rel="noopener">${ic('search')}Search posts and reels</a>`;});
+ safe(marksUI);
  const like=P.filter(x=>x!==p&&x.iso===p.iso&&x.c===p.c).sort((a,b)=>'LIG'.indexOf(a.t)-'LIG'.indexOf(b.t)).slice(0,6);
  const more=like.length<6?P.filter(x=>x!==p&&x.iso!==p.iso&&x.c===p.c&&x.t!=='G'&&x.ct===p.ct).slice(0,6-like.length):[];
  $('dlike').innerHTML=[...like,...more].map(x=>`<button data-i="${x.i}"><b>${esc(x.n)}</b><span>${esc(x.co)}</span></button>`).join('');
  {const L=seq();$('dpos').textContent=`${(L.indexOf(p)+1).toLocaleString()} of ${L.length.toLocaleString()} · swipe or use arrows`}
- if(!$('dd').open)$('dd').showModal();$('dd').scrollTop=0}
+ if(!$('dd').open){try{$('dd').showModal()}catch(err){$('dd').setAttribute('open','');reportErr(err)}}$('dd').scrollTop=0}
 function seq(){return F.includes(cur)?F:P}
 function step(d){const L=seq();let i=L.indexOf(cur)+d;if(i<0)i=L.length-1;if(i>=L.length)i=0;const b=document.querySelector('#dd .dbody');openP(L[i]);b.classList.remove('sl','sr');void b.offsetWidth;b.classList.add(d>0?'sl':'sr')}
 $('dprev').onclick=()=>step(-1);$('dfwd').onclick=()=>step(1);
