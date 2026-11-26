@@ -674,7 +674,10 @@ function railUI(){const r=$('rail');const cts=CO_ORD.filter(c=>F.some(p=>p.ct===
  railCur()}
 function railCur(){if(!$('rail').classList.contains('on'))return;let cur='';for(const sct of document.querySelectorAll('#list .country')){if(sct.getBoundingClientRect().top<140)cur=sct.dataset.ct;else break}
  $('rail').querySelectorAll('button').forEach(b=>b.classList.toggle('cur',b.dataset.ct===cur))}
-function jumpCt(ct){const i=F.findIndex(p=>p.ct===ct);if(i<0)return;while(shown<=i&&shown<F.length)renderMore();
+let jumpToken=0;
+async function jumpCt(ct){const token=++jumpToken,filtered=F,i=filtered.findIndex(p=>p.ct===ct);if(i<0)return;
+ while(F===filtered&&shown<=i&&shown<F.length){renderMore();await new Promise(resolve=>requestAnimationFrame(resolve));if(token!==jumpToken)return}
+ if(token!==jumpToken||F!==filtered)return;
  const sec=[...document.querySelectorAll('#list .country')].find(x=>x.dataset.ct===ct);if(sec){scrollTo({top:sec.getBoundingClientRect().top+scrollY-60,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});railCur()}}
 {let last='';const r=$('rail');const go=e=>{const b=document.elementFromPoint(e.clientX,e.clientY)?.closest('.rail button');if(b&&b.dataset.ct!==last){last=b.dataset.ct;buzz();jumpCt(last)}};
  r.addEventListener('pointerdown',e=>{last='';r.setPointerCapture(e.pointerId);go(e)});r.addEventListener('pointermove',e=>{if(e.buttons||e.pointerType==='touch')go(e)});r.addEventListener('pointerup',()=>last='')}
