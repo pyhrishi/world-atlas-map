@@ -736,7 +736,7 @@ $('list').addEventListener('click',e=>{const m=e.target.closest('.more');if(m){m
 const cv=$('globe'),cx=cv.getContext('2d');
 let W=0,H=0,R=0,dpr=1,rot=[-78,-18],zoom=1,counts=new Map(),maxC=1,hoverIso='',idle=true,lastInt=0,anim=null;
 const proj=d3.geoOrthographic().clipAngle(90).precision(.4);const path=d3.geoPath(proj,cx);const grat=d3.geoGraticule10();
-let GX=0,GY=0;function size(){const b=cv.getBoundingClientRect();dpr=Math.min(2,devicePixelRatio||1);W=b.width;H=b.height;cv.width=W*dpr;cv.height=H*dpr;
+let GX=0,GY=0;function size(){const b=cv.getBoundingClientRect(),nextDpr=Math.min(2,devicePixelRatio||1);if(b.width===W&&b.height===H&&nextDpr===dpr)return;dpr=nextDpr;W=b.width;H=b.height;cv.width=W*dpr;cv.height=H*dpr;
  if(innerWidth>=900){R=Math.min(W*0.3,(H-230)*0.5);GX=W>1100?W*0.58:W/2;GY=(H-210)/2+14}else{R=Math.min(W,H)*0.45;GX=W/2;GY=H/2}draw()}
 function lerp(a,b,t){return a.map((v,i)=>Math.round(v+(b[i]-v)*t))}
 const LO=[58,62,69],HI=[217,221,227];
