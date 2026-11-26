@@ -95,12 +95,19 @@ h1 em{color:var(--mute)}
 .chip-on{display:flex;align-items:center;gap:6px;font-size:13px;background:var(--s2);border:1px solid var(--line);border-radius:30px;padding:4px 6px 4px 12px}
 .chip-on button{border:0;background:var(--s3);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;cursor:pointer}
 .chip-on svg.i{width:14px;height:14px}
-.country{margin-top:30px}
-.country-head{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:10px;width:100%;padding:12px 10px 10px 0;border:0;background:linear-gradient(var(--bg) 70%,#13141700);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);font:400 26px/1.1 "Instrument Serif",serif;text-align:left;cursor:pointer}
-.country-head .chev{width:28px;height:28px;display:grid;place-items:center;border:1px solid var(--line);border-radius:9px;background:var(--s1);font:500 15px Inter,sans-serif;color:var(--mute);transition:transform .18s}
+.country{margin-top:30px;content-visibility:auto;contain-intrinsic-size:auto 520px}
+.country-head{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:10px;width:100%;padding:12px 10px 10px 0;border:0;background:linear-gradient(var(--bg) 70%,#13141700);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);font:400 26px/1.1 "Instrument Serif",serif;text-align:left;cursor:pointer;transition:color .22s ease,padding-left .28s cubic-bezier(.2,.8,.2,1)}
+.country-head:hover{color:var(--acc);padding-left:3px}
+.country-head:focus-visible{outline:2px solid var(--acc);outline-offset:3px;border-radius:10px}
+.country-head .chev{width:28px;height:28px;display:grid;place-items:center;border:1px solid var(--line);border-radius:9px;background:var(--s1);font:500 15px Inter,sans-serif;color:var(--mute);transition:transform .42s cubic-bezier(.2,.8,.2,1),background .25s,border-color .25s,color .25s}
+.country-head:hover .chev{background:var(--s2);border-color:#754538;color:var(--acc)}
 .country.collapsed .country-head .chev{transform:rotate(-90deg)}
 .country-head small{font:500 13px Inter,sans-serif;color:var(--dim)}
-.country.collapsed .grid{display:none}
+.country-content{display:grid;grid-template-rows:1fr;transition:grid-template-rows .46s cubic-bezier(.22,1,.36,1);will-change:grid-template-rows}
+.country-inner{min-height:0;overflow:hidden;opacity:1;transform:translateY(0);filter:blur(0);transition:opacity .25s ease,transform .42s cubic-bezier(.22,1,.36,1),filter .3s ease}
+.country.collapsed .country-content{grid-template-rows:0fr}
+.country.collapsed .country-inner{opacity:0;transform:translateY(-9px);filter:blur(3px);pointer-events:none}
+@media(prefers-reduced-motion:reduce){.country-content,.country-inner,.country-head,.country-head .chev{transition:none!important;filter:none!important;transform:none!important}}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
 .list-view{display:flex;flex-direction:column;gap:7px}
 .list-view .card{grid-template-columns:40px minmax(0,1fr);padding:12px 14px}
@@ -764,15 +771,16 @@ function renderMore(){
  list.querySelector('.more')?.remove();
  const next=F.slice(shown,shown+200);let k=0;
  if(shown&&next.length&&next[0].co===F[shown-1].co){const gs=list.querySelectorAll('.grid,.list-view,.compact-view');while(k<next.length&&next[k].co===next[0].co)k++;gs[gs.length-1].insertAdjacentHTML('beforeend',next.slice(0,k).map(card).join(''))}
- let html='',buf=[];const flush=()=>{if(!buf.length)return;const co=buf[0].co,iso=buf[0].iso,tot=countryTotals.get(co)||0,collapsed=collapsedCountries.has(iso);html+=`<section class="country${collapsed?' collapsed':''}" data-iso="${iso}" data-ct="${buf[0].ct}">${st.co?'':`<button class="country-head" type="button" data-toggle-country="${iso}" aria-expanded="${!collapsed}"><span class="chev">⌄</span><span>${esc(co)} <small>${tot.toLocaleString()} places · ${CONT[buf[0].ct]}</small></span></button>`}<div class="${viewMode==='list'?'list-view':viewMode==='compact'?'compact-view':'grid'}">${buf.map(card).join('')}</div></section>`;buf=[]};
+ let html='',buf=[];const flush=()=>{if(!buf.length)return;const co=buf[0].co,iso=buf[0].iso,tot=countryTotals.get(co)||0,collapsed=collapsedCountries.has(iso);html+=`<section class="country${collapsed?' collapsed':''}" data-iso="${iso}" data-ct="${buf[0].ct}">${st.co?'':`<button class="country-head" type="button" data-toggle-country="${iso}" aria-expanded="${!collapsed}"><span class="chev">⌄</span><span>${esc(co)} <small>${tot.toLocaleString()} places · ${CONT[buf[0].ct]}</small></span></button>`}<div class="country-content"><div class="country-inner" ${collapsed?'aria-hidden="true"':''}><div class="${viewMode==='list'?'list-view':viewMode==='compact'?'compact-view':'grid'}">${buf.map(card).join('')}</div></div></div></section>`;buf=[]};
  next.slice(k).forEach(p=>{if(buf.length&&p.co!==buf[0].co)flush();buf.push(p)});flush();
  list.insertAdjacentHTML('beforeend',html);shown+=next.length;
  if(shown<F.length){list.insertAdjacentHTML('beforeend',`<button class="more">Show more · ${(F.length-shown).toLocaleString()} left</button>`);mo.observe(list.querySelector('.more'))}
 }
-$('list').addEventListener('click',e=>{const toggle=e.target.closest('[data-toggle-country]');if(toggle){const iso=toggle.dataset.toggleCountry;if(collapsedCountries.has(iso))collapsedCountries.delete(iso);else collapsedCountries.add(iso);saveCollapsed();const section=toggle.closest('.country');section.classList.toggle('collapsed',collapsedCountries.has(iso));toggle.setAttribute('aria-expanded',String(!collapsedCountries.has(iso)));$('collapseAll').textContent=collapsedCountries.size?'Expand countries':'Collapse countries';return}const m=e.target.closest('.more');if(m){mo.unobserve(m);renderMore();return}const c=e.target.closest('.card');if(c)openP(P[+c.dataset.i])});
+function setCountryCollapsed(section,collapsed){const iso=section.dataset.iso;if(collapsed)collapsedCountries.add(iso);else collapsedCountries.delete(iso);section.classList.toggle('collapsed',collapsed);const button=section.querySelector('[data-toggle-country]');button?.setAttribute('aria-expanded',String(!collapsed));section.querySelector('.country-inner')?.setAttribute('aria-hidden',String(collapsed));}
+$('list').addEventListener('click',e=>{const toggle=e.target.closest('[data-toggle-country]');if(toggle){const section=toggle.closest('.country'),collapsed=!section.classList.contains('collapsed');setCountryCollapsed(section,collapsed);saveCollapsed();$('collapseAll').textContent=collapsedCountries.size?'Expand countries':'Collapse countries';return}const m=e.target.closest('.more');if(m){mo.unobserve(m);renderMore();return}const c=e.target.closest('.card');if(c)openP(P[+c.dataset.i])});
 document.querySelector('.view-group').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(!b)return;viewMode=b.dataset.view;document.querySelectorAll('[data-view]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));document.querySelectorAll('#list .grid,#list .list-view,#list .compact-view').forEach(x=>x.className=viewMode==='list'?'list-view':viewMode==='compact'?'compact-view':'grid')});
 $('sortPlaces').addEventListener('change',e=>{sortMode=e.target.value;apply()});
-$('collapseAll').addEventListener('click',()=>{const sections=[...document.querySelectorAll('#list .country')],allCollapsed=sections.length&&sections.every(s=>collapsedCountries.has(s.dataset.iso)),shouldCollapse=!allCollapsed;new Set(F.map(p=>p.iso)).forEach(iso=>{if(shouldCollapse)collapsedCountries.add(iso);else collapsedCountries.delete(iso)});sections.forEach(s=>{const iso=s.dataset.iso;s.classList.toggle('collapsed',collapsedCountries.has(iso));s.querySelector('[data-toggle-country]')?.setAttribute('aria-expanded',String(!collapsedCountries.has(iso)))});saveCollapsed();$('collapseAll').textContent=shouldCollapse?'Expand countries':'Collapse countries'});
+$('collapseAll').addEventListener('click',()=>{const sections=[...document.querySelectorAll('#list .country')],allCollapsed=sections.length&&sections.every(s=>s.classList.contains('collapsed')),shouldCollapse=!allCollapsed;new Set(F.map(p=>p.iso)).forEach(iso=>{if(shouldCollapse)collapsedCountries.add(iso);else collapsedCountries.delete(iso)});sections.forEach(s=>setCountryCollapsed(s,shouldCollapse));saveCollapsed();$('collapseAll').textContent=shouldCollapse?'Expand countries':'Collapse countries'});
 
 /* ---------- globe ---------- */
 const cv=$('globe'),cx=cv.getContext('2d');
