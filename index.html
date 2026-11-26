@@ -76,6 +76,27 @@ h1 em{color:var(--mute)}
 .cbar{width:42px;height:4px;border-radius:4px;background:var(--s3);overflow:hidden}
 .cbar i{display:block;height:100%;border-radius:4px;background:var(--acc)}
 .copt .cselected{color:var(--acc);font-size:16px}
+.cfeatured{margin:8px 0 18px}
+.cfeatured-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:0 0 9px}
+.cfeatured-head b{font-size:13px}.cfeatured-head span{font-size:11px;color:var(--dim)}
+.cfeatured-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.cfeature{min-width:0;min-height:112px;padding:12px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(145deg,var(--s3),var(--s1) 78%);text-align:left;display:flex;flex-direction:column;justify-content:space-between;gap:9px;cursor:pointer;transition:border-color .14s,transform .14s}
+.cfeature:active{transform:scale(.98)}
+.cfeature[aria-pressed=true]{border-color:var(--acc);background:linear-gradient(145deg,#3a2924,var(--s1))}
+.cfeature-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.cfeature-flag{font-size:27px;line-height:1}
+.cfeature-arrow{color:var(--dim);font-size:14px}
+.cfeature-name{font-size:14px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cfeature-meta{font-size:11px;color:var(--mute)}
+.cpreview{display:grid;grid-template-columns:54px minmax(0,1fr);gap:12px;padding:14px;margin:12px 0 16px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(140deg,var(--s3),var(--s1) 75%)}
+.cpreview-flag{width:54px;height:54px;border-radius:15px;background:#ffffff0b;display:grid;place-items:center;font-size:34px}
+.cpreview-title{font-size:16px;font-weight:650}.cpreview-sub{font-size:12px;color:var(--mute)}
+.cpreview-stats{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.cpreview-stat{padding:8px 5px;border-radius:11px;background:#ffffff08;text-align:center}
+.cpreview-stat b{display:block;font-size:15px;font-variant-numeric:tabular-nums}
+.cpreview-stat span{font-size:10px;color:var(--dim)}
+.cpreview-go{grid-column:1/-1;width:100%;min-height:42px;border:0;border-radius:12px;background:var(--acc);color:#1a0f0c;font-weight:650;cursor:pointer}
+@media(max-width:380px){.cpreview-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:640px){.copt{min-height:70px}.cbar{width:30px}}
 .legend{display:flex;gap:6px 12px;font-size:12px;color:var(--dim);flex-wrap:wrap;justify-content:center}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
@@ -535,7 +556,7 @@ html,body{width:100%;max-width:100%;overflow-x:clip}
 </dialog>
 
 <dialog class="sheet" id="cs" aria-labelledby="csh"><div class="sh"><h3 id="csh">Choose a country</h3><button class="x" data-close aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
- <div class="sb"><label class="csearch"><svg class="i"><use href="#i-search"/></svg><input id="cq" type="search" placeholder="Type a country" autocomplete="off"></label><div class="clist" id="clist"></div></div>
+ <div class="sb"><label class="csearch"><svg class="i"><use href="#i-search"/></svg><input id="cq" type="search" placeholder="Type a country, code, or continent" autocomplete="off"></label><div id="cfeatured"></div><div id="cpreview"></div><div class="clist" id="clist"></div></div>
  <div class="sf"><button class="btn" id="cany">Any country</button></div>
 </dialog>
 <dialog class="sheet" id="dd" aria-labelledby="dn">
@@ -896,17 +917,23 @@ $('fs').addEventListener('close',()=>apply(true));$('ms').addEventListener('clos
 
 
 /* ---------- country picker ---------- */
-let CL=[];
+let CL=[],previewIso='';
 const countryFlag=iso=>/^[A-Z]{2}$/.test(iso)?String.fromCodePoint(...[...iso].map(c=>127397+c.charCodeAt(0))):'🌐';
+function countryPreview(c){if(!c){$('cpreview').innerHTML='';return} $('cpreview').innerHTML=`<div class="cpreview"><div class="cpreview-flag">${countryFlag(c.iso)}</div><div><div class="cpreview-title">${esc(c.n)}</div><div class="cpreview-sub">${CONT[c.ct]} · ${c.iso} · ${c.k} destinations</div></div><div class="cpreview-stats"><div class="cpreview-stat"><b>${c.k}</b><span>All places</span></div><div class="cpreview-stat"><b>${c.L||0}</b><span>Legendary</span></div><div class="cpreview-stat"><b>${c.I||0}</b><span>Iconic</span></div><div class="cpreview-stat"><b>${c.G||0}</b><span>Gems</span></div></div><button class="cpreview-go" data-explore="${c.iso}">Explore ${esc(c.n)} →</button></div>`}
 function countryList(){const q=$('cq').value.trim().toLowerCase();const groups={};
  const matched=CL.filter(c=>!q||c.n.toLowerCase().includes(q)||c.iso.toLowerCase().includes(q)||CONT[c.ct].toLowerCase().includes(q));
  const maxPlaces=Math.max(1,...CL.map(c=>c.k));
  matched.forEach(c=>(groups[c.ct]=groups[c.ct]||[]).push(c));
- $('clist').innerHTML=`<div class="clist-summary">${matched.length} of ${CL.length} countries & territories · ${matched.reduce((n,c)=>n+c.k,0).toLocaleString()} destinations</div>`+Object.keys(CONT).filter(k=>groups[k]).map(k=>`<div class="clist-group"><h4>${CONT[k]}</h4>${groups[k].map(c=>`<button class="copt" data-iso="${c.iso}" aria-pressed="${st.co===c.iso}"><span class="cflag" aria-hidden="true">${countryFlag(c.iso)}</span><span class="cinfo"><span class="cname">${esc(c.n)}</span><span class="cmeta">${CONT[c.ct]} · ${c.iso}</span></span><span class="cstat"><span>${c.k}</span><span class="cbar"><i style="width:${Math.max(4,c.k/maxPlaces*100)}%"></i></span>${st.co===c.iso?'<b class="cselected">✓</b>':''}</span></button>`).join('')}</div>`).join('')||'<p style="color:var(--mute)">No country matches. Try a country, continent, or code.</p>'}
+ const featured=!q?CL.slice().sort((a,b)=>b.k-a.k).slice(0,4):[];
+ $('cfeatured').innerHTML=featured.length?`<div class="cfeatured"><div class="cfeatured-head"><b>Explore the atlas</b><span>Most destinations in this atlas</span></div><div class="cfeatured-grid">${featured.map(c=>`<button class="cfeature" data-preview="${c.iso}" aria-pressed="${previewIso===c.iso}"><span class="cfeature-top"><span class="cfeature-flag">${countryFlag(c.iso)}</span><span class="cfeature-arrow">↗</span></span><span><span class="cfeature-name">${esc(c.n)}</span><span class="cfeature-meta" style="display:block">${c.k} places · ${CONT[c.ct]}</span></span></button>`).join('')}</div></div>`:'';
+ const selected=CL.find(c=>c.iso===(previewIso||st.co));countryPreview(selected);
+ $('clist').innerHTML=`<div class="clist-summary">${matched.length} of ${CL.length} countries & territories · ${matched.reduce((n,c)=>n+c.k,0).toLocaleString()} destinations</div>`+Object.keys(CONT).filter(k=>groups[k]).map(k=>`<div class="clist-group"><h4>${CONT[k]}</h4>${groups[k].map(c=>`<button class="copt" data-iso="${c.iso}" data-preview="${c.iso}" aria-pressed="${st.co===c.iso}"><span class="cflag" aria-hidden="true">${countryFlag(c.iso)}</span><span class="cinfo"><span class="cname">${esc(c.n)}</span><span class="cmeta">${CONT[c.ct]} · ${c.iso}</span></span><span class="cstat"><span>${c.k}</span><span class="cbar"><i style="width:${Math.max(4,c.k/maxPlaces*100)}%"></i></span>${st.co===c.iso?'<b class="cselected">✓</b>':''}</span></button>`).join('')}</div>`).join('')||'<p style="color:var(--mute)">No country matches. Try a country, continent, or code.</p>'}
 let fromFilters=false;
-function openCountries(ff){fromFilters=ff;$('cq').value='';countryList();$('cs').showModal();if(innerWidth>640)$('cq').focus()}
-$('cq').addEventListener('input',countryList);
-$('clist').onclick=e=>{const b=e.target.closest('.copt');if(!b)return;st.co=b.dataset.iso;flyTo(st.co);$('cs').close();if(fromFilters){fillFilters()}apply(!fromFilters)};
+function openCountries(ff){fromFilters=ff;previewIso=st.co||'';$('cq').value='';countryList();$('cs').showModal();if(innerWidth>640)$('cq').focus()}
+$('cq').addEventListener('input',()=>{previewIso='';countryList()});
+$('clist').onclick=e=>{const b=e.target.closest('.copt');if(!b)return;previewIso=b.dataset.preview;countryList()};
+$('cfeatured').onclick=e=>{const b=e.target.closest('[data-preview]');if(!b)return;previewIso=b.dataset.preview;countryList()};
+$('cpreview').onclick=e=>{const b=e.target.closest('[data-explore]');if(!b)return;st.co=b.dataset.explore;flyTo(st.co);$('cs').close();if(fromFilters)fillFilters();apply(!fromFilters)};
 $('cany').onclick=()=>{st.co='';$('cs').close();if(fromFilters)fillFilters();apply()};
 $('cpick').onclick=()=>openCountries(false);
 $('fco').onclick=()=>openCountries(true);
@@ -971,7 +998,7 @@ Promise.all([fetch('places.json').then(r=>r.json()),fetch('geo.json').then(r=>r.
  P.sort((a,b)=>ord[a.ct]-ord[b.ct]||cc[b.co]-cc[a.co]||a.co.localeCompare(b.co)||to[a.t]-to[b.t]||a.i0-b.i0);
  PK=new Map(P.map(p=>[K(p),p]));P.forEach((p,i)=>{p.i=i;p.x=(p.n+' '+p.h).toLowerCase();p.s_=(p.n+' '+p.co+' '+CONT[p.ct]+' '+p.h+' '+CAT[p.c][0]).toLowerCase();p.mo=months(p.s)});
  COLS.forEach(c=>colSet[c[0]]=new Set(P.filter(c[3])));
- {const m=new Map();P.forEach(p=>{const c=m.get(p.iso)||{iso:p.iso,n:p.co,ct:p.ct,k:0};c.k++;m.set(p.iso,c)});CL=[...m.values()].sort((a,b)=>a.n.localeCompare(b.n));countryNameByIso=new Map(CL.map(c=>[c.iso,c.n]))}
+ {const m=new Map();P.forEach(p=>{const c=m.get(p.iso)||{iso:p.iso,n:p.co,ct:p.ct,k:0,L:0,I:0,G:0};c.k++;c[p.t]++;m.set(p.iso,c)});CL=[...m.values()].sort((a,b)=>a.n.localeCompare(b.n));countryNameByIso=new Map(CL.map(c=>[c.iso,c.n]))}
  G={f:g.f.map(f=>({type:'Feature',i:f.i,geometry:{type:f.t,coordinates:f.c}})),d:g.d,c:g.c};G.byIso={};G.f.forEach(f=>{if(f.i)G.byIso[f.i]=f});
  const cn=new Set(P.map(p=>p.iso)).size,tc=t=>P.filter(p=>p.t===t).length;
  $('stats').innerHTML=`<div><b>${P.length.toLocaleString()}</b><span>places</span></div><div><b>${cn}</b><span>countries & territories</span></div><div><b>${tc('L')}</b><span>Legendary</span></div>`;
