@@ -781,7 +781,7 @@ function jumpCt(ct){const i=F.findIndex(p=>p.ct===ct);if(i<0)return;
  let rq=0;addEventListener('scroll',()=>{if(!r.classList.contains('on'))return;if(!rq)rq=requestAnimationFrame(()=>{rq=0;railCur()});show()},{passive:true});r.addEventListener('pointerdown',show);r.addEventListener('pointermove',show)}
 /* ---------- search suggestions ---------- */
 let recent=[];try{recent=JSON.parse(localStorage.getItem('atlas10k-recent')||'[]')}catch(e){}
-const remember=q=>{q=q.trim();if(q.length<2)return;recent=[q,...recent.filter(x=>x.toLowerCase()!==q.toLowerCase())].slice(0,6);try{localStorage.setItem('atlas10k-recent',JSON.stringify(recent))}catch(e){}};
+const remember=q=>{q=q.trim();if(q.length<2)return;recent=[q,...recent.filter(x=>x.toLowerCase()!==q.toLowerCase())].slice(0,6);try{localStorage.setItem('atlas10k-recent',JSON.stringify(recent))}catch(e){}if(window.__pushRecent)window.__pushRecent()};
 const hl=(t,q)=>{const i=t.toLowerCase().indexOf(q);return i<0?esc(t):esc(t.slice(0,i))+'<mark>'+esc(t.slice(i,i+q.length))+'</mark>'+esc(t.slice(i+q.length))};
 function sugUI(){const box=$('sug'),q=$('q').value.trim().toLowerCase();let h='';
  if(!q){if(recent.length)h='<h5>Recent</h5>'+recent.map(r=>`<button data-r="${esc(r)}"><span class="cic">${ic('history')}</span><span>${esc(r)}</span></button>`).join('')}
@@ -1103,7 +1103,7 @@ else{
  $('signOut').onclick=async()=>{if(!fbAuth)return;$('signOut').disabled=true;
   try{await fbAuth.signOut()}catch(e){}
   try{await fbDb.terminate();await fbDb.clearPersistence()}catch(e){}
-  try{['atlas10k-marks','atlas10k-synced'].forEach(k=>localStorage.removeItem(k))}catch(e){}
+  try{['atlas10k-marks','atlas10k-synced','atlas10k-mt','atlas10k-dirty','atlas10k-rt','atlas10k-recent'].forEach(k=>localStorage.removeItem(k))}catch(e){}
   location.replace(location.pathname)};
  // finish a magic-link sign-in
  if(fbAuth.isSignInWithEmailLink(location.href)){let em='';try{em=localStorage.getItem('atlas10k-email')||''}catch(_){}
@@ -1125,13 +1125,36 @@ async function loadPlaces(){
  await fbDb.doc('atlas/meta').set({chunks:parts,count:d.length,at:firebase.firestore.FieldValue.serverTimestamp()});
  return d}
 function syncMarks(u){
- const ref=fbDb.doc('users/'+u.uid);let first=true,pushT=0;
- window.__pushMarks=()=>{clearTimeout(pushT);pushT=setTimeout(()=>ref.set({marks,at:firebase.firestore.FieldValue.serverTimestamp()}).catch(()=>{}),600)};
- ref.onSnapshot(s=>{if(s.metadata.hasPendingWrites)return;const remote=s.exists?(s.data().marks||{}):null;
-  if(first){first=false;let synced=false;try{synced=localStorage.getItem('atlas10k-synced')==='1'}catch(_){}
-   if(remote===null||!synced){marks=Object.assign({},remote||{},marks);try{localStorage.setItem('atlas10k-synced','1')}catch(_){}try{localStorage.setItem('atlas10k-marks',JSON.stringify(marks))}catch(_){}window.__pushMarks();marksChanged();return}}
-  if(remote&&JSON.stringify(remote)!==JSON.stringify(marks)){marks=remote;try{localStorage.setItem('atlas10k-marks',JSON.stringify(marks))}catch(_){}marksChanged()}
- },()=>{})}
+ /* Each mark carries the time it last changed (deletions too), so edits made on several devices — even offline — merge with the newest change winning. */
+ const ref=fbDb.doc('users/'+u.uid);
+ const LS={get:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch(_){return d}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(_){}}};
+ let meta=LS.get('atlas10k-mt',{});            // key -> [value or '', time]
+ let prev=Object.assign({},marks),dirty=LS.get('atlas10k-dirty',false),pushT=0,rt=LS.get('atlas10k-rt',0);
+ const stamp=()=>{const now=Date.now();const keys=new Set([...Object.keys(prev),...Object.keys(marks)]);let ch=false;
+  for(const k of keys)if((prev[k]||'')!==(marks[k]||'')){meta[k]=[marks[k]||'',now];ch=true}
+  if(!Object.keys(meta).length)for(const k in marks)meta[k]=[marks[k],0];
+  prev=Object.assign({},marks);if(ch){dirty=true;LS.set('atlas10k-mt',meta);LS.set('atlas10k-dirty',true)}return ch};
+ const push=()=>{clearTimeout(pushT);if(!dirty)return;dirty=false;LS.set('atlas10k-dirty',false);
+  ref.set({m:meta,recent,rt,at:firebase.firestore.FieldValue.serverTimestamp()}).catch(()=>{dirty=true;LS.set('atlas10k-dirty',true)})};
+ window.__pushMarks=()=>{if(stamp()){clearTimeout(pushT);pushT=setTimeout(push,500)}};
+ window.__pushRecent=()=>{rt=Date.now();LS.set('atlas10k-rt',rt);dirty=true;LS.set('atlas10k-dirty',true);clearTimeout(pushT);pushT=setTimeout(push,500)};
+ // end of session: send anything pending right away
+ const flush=()=>{stamp();push()};
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flush()});
+ addEventListener('pagehide',flush);addEventListener('online',flush);
+ stamp();
+ ref.onSnapshot(s=>{if(s.metadata.hasPendingWrites)return;const d=s.exists?s.data():{};
+  let rm=d.m||{};if(!d.m&&d.marks)for(const k in d.marks)rm[k]=[d.marks[k],0];   // older format
+  let localNewer=false;const all=new Set([...Object.keys(rm),...Object.keys(meta)]);
+  for(const k of all){const a=meta[k],b=rm[k];if(!a||(b&&b[1]>a[1]))meta[k]=b;else if(!b||a[1]>b[1])localNewer=true}
+  const next={};for(const k in meta)if(meta[k]&&meta[k][0])next[k]=meta[k][0];
+  LS.set('atlas10k-mt',meta);
+  if(Array.isArray(d.recent)&&(d.rt||0)>rt){recent=d.recent.slice(0,6);rt=d.rt;LS.set('atlas10k-rt',rt);try{localStorage.setItem('atlas10k-recent',JSON.stringify(recent))}catch(_){}}
+  else if(rt>(d.rt||0))localNewer=true;
+  if(JSON.stringify(next)!==JSON.stringify(marks)){marks=next;prev=Object.assign({},marks);try{localStorage.setItem('atlas10k-marks',JSON.stringify(marks))}catch(_){}marksChanged()}
+  if(localNewer||!s.exists){dirty=true;push()}
+ },()=>{});
+ if(dirty)push()}
 function marksChanged(){if(!P.length)return;markCounts=null;refreshBeen();dock();draw();
  document.querySelectorAll('#list .card').forEach(c=>{const p=P[+c.dataset.i];if(p)c.outerHTML=card(p)});
  if(st.co)head();if($('dd').open&&cur)marksUI()}
