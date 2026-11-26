@@ -583,10 +583,11 @@ let PK=new Map(),countryNameByIso=new Map();
 const buzz=()=>{try{navigator.vibrate&&navigator.vibrate(10)}catch(e){}};
 
 /* ---------- filtering ---------- */
-let colSet={};
+let colSet={},countryTotals=new Map();
 function base(p,skipCo){const q=st.q;return(!st.ct||p.ct===st.ct)&&(skipCo||!st.co||p.iso===st.co)&&(!st.c||p.c===st.c)&&(!st.t||p.t===st.t)&&(st.m<0||(p.mo>>st.m)&1)&&(!st.col||colSet[st.col].has(p))&&(!st.l||marks[K(p)]===st.l)&&(!q||p.s_.includes(q))}
 function apply(scroll){
  F=P.filter(p=>base(p,false));
+ countryTotals=new Map();F.forEach(p=>countryTotals.set(p.co,(countryTotals.get(p.co)||0)+1));
  counts=new Map();P.forEach(p=>{if(base(p,true))counts.set(p.iso,(counts.get(p.iso)||0)+1)});activePickDots=G?G.d.filter(d=>counts.has(d[0])):[];maxC=Math.max(1,...counts.values());
  shown=0;$('list').innerHTML='';renderMore();head();dock();draw();
  if(st.co)stopSpin();else startSpin();
@@ -725,7 +726,7 @@ function renderMore(){
  list.querySelector('.more')?.remove();
  const next=F.slice(shown,shown+200);let k=0;
  if(shown&&next.length&&next[0].co===F[shown-1].co){const gs=list.querySelectorAll('.grid');while(k<next.length&&next[k].co===next[0].co)k++;gs[gs.length-1].insertAdjacentHTML('beforeend',next.slice(0,k).map(card).join(''))}
- let html='',buf=[];const flush=()=>{if(!buf.length)return;const co=buf[0].co,tot=F.filter(x=>x.co===co).length;html+=`<section class="country" data-ct="${buf[0].ct}">${st.co?'':`<h3>${esc(co)}<small>${tot} place${tot>1?'s':''} · ${CONT[buf[0].ct]}</small></h3>`}<div class="grid">${buf.map(card).join('')}</div></section>`;buf=[]};
+ let html='',buf=[];const flush=()=>{if(!buf.length)return;const co=buf[0].co,tot=countryTotals.get(co)||0;html+=`<section class="country" data-ct="${buf[0].ct}">${st.co?'':`<h3>${esc(co)}<small>${tot} place${tot>1?'s':''} · ${CONT[buf[0].ct]}</small></h3>`}<div class="grid">${buf.map(card).join('')}</div></section>`;buf=[]};
  next.slice(k).forEach(p=>{if(buf.length&&p.co!==buf[0].co)flush();buf.push(p)});flush();
  list.insertAdjacentHTML('beforeend',html);shown+=next.length;
  if(shown<F.length){list.insertAdjacentHTML('beforeend',`<button class="more">Show more · ${(F.length-shown).toLocaleString()} left</button>`);mo.observe(list.querySelector('.more'))}
