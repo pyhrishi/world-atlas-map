@@ -822,7 +822,7 @@ $('zin').onclick=()=>{zoom=Math.min(6,zoom*1.4);lastInt=performance.now();draw()
 $('zout').onclick=()=>{zoom=Math.max(.8,zoom/1.4);lastInt=performance.now();draw()};
 $('greset').onclick=()=>{st.co='';zoom=1;rot=[-78,-18];idle=true;apply()};
 $('pv').onclick=()=>$('lt').scrollIntoView({behavior:'smooth'});
-$('px').onclick=()=>{st.co='';apply();zoom=Math.max(1,zoom/2);draw()};
+$('px').onclick=()=>{st.co='';zoom=Math.max(1,zoom/2);apply()};
 // Idle globe animation: run only while the globe is visible and the page is active.
 let lastT=0,spinRaf=0,visible=true;
 const reduceMotion=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
