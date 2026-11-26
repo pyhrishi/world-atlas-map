@@ -9,7 +9,7 @@
 <!-- Start critical downloads early while the browser parses the page. -->
 <link rel="preload" href="places.json" as="fetch" crossorigin>
 <link rel="preload" href="geo.json" as="fetch" crossorigin>
-<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js" as="script">
+<link rel="preload" href="https://ajax.googleapis.com/ajax/libs/d3js/7.8.5/d3.min.js" as="script">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -587,7 +587,7 @@ html,body{width:100%;max-width:100%;overflow-x:clip}
  </div>
 </dialog>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/d3js/7.8.5/d3.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js'"></script>
 <script>
 {
 const $=id=>document.getElementById(id);
@@ -1015,7 +1015,7 @@ Promise.all([fetch('places.json').then(r=>r.json()),fetch('geo.json').then(r=>r.
  $('cols').innerHTML=COLS.map(c=>`<button class="col" data-k="${c[0]}" aria-pressed="false"><span class="ic">${ic(c[2])}</span><span><b>${c[1]}</b><span>${colSet[c[0]].size.toLocaleString()} places</span></span></button>`).join('');
  $('cols').onclick=e=>{const b=e.target.closest('.col');if(!b)return;st.col=st.col===b.dataset.k?'':b.dataset.k;apply(true)};
  refreshBeen();size();apply();startSpin();
-}).catch(()=>{$('list').innerHTML='<div class="empty">Could not load the atlas data.</div>'});
+}).catch(err=>{console.error('Atlas startup failed:',err);$('stats').innerHTML='<div class="empty" role="alert" style="grid-column:1/-1">The atlas could not finish loading. Check your connection and tap Reload to try again. <button class="btn" onclick="location.reload()" style="margin:10px auto 0">Reload atlas</button></div>';$('list').innerHTML='<div class="empty">Atlas data is temporarily unavailable. Your saved places remain on this device.</div>';});
 }
 </script>
 </body>
