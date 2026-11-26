@@ -229,7 +229,7 @@ dialog::backdrop{background:#07080acc;backdrop-filter:blur(4px)}
 input:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 @media(max-width:640px){
  .hero{min-height:auto;grid-template-rows:auto auto auto}
- .top{padding-top:20px}.stats{gap:16px}.stats b{font-size:24px}
+ .top{padding-top:calc(20px + env(safe-area-inset-top))}.stats{gap:16px}.stats b{font-size:24px}
  .globe{height:min(100vw,440px);min-height:0}
  .gctl{bottom:8px;right:12px}.gctl button{width:40px;height:40px}
  .grid{grid-template-columns:minmax(0,1fr)}
@@ -334,6 +334,12 @@ input:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(-
 .pc a.src{position:absolute;inset:0;z-index:1}
 #dd .pc.hp~.dh{margin-top:-52px}
 .cic.ld{animation:sh 1.4s linear infinite;background:linear-gradient(100deg,var(--s3) 30%,#353940 50%,var(--s3) 70%);background-size:300% 100%}
+.top{padding-top:calc(28px + env(safe-area-inset-top))}
+@media(max-width:640px){.top{padding-top:calc(20px + env(safe-area-inset-top))}}
+.tbar{height:calc(56px + env(safe-area-inset-top));padding-top:env(safe-area-inset-top);transform:translateY(-101%)}
+.tbar.on{transform:none}
+.country h3{top:calc(56px + env(safe-area-inset-top))}
+html{scroll-padding-top:calc(60px + env(safe-area-inset-top))}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
