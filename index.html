@@ -584,6 +584,7 @@ function apply(scroll){
  F=P.filter(p=>base(p,false));
  counts=new Map();P.forEach(p=>{if(base(p,true))counts.set(p.iso,(counts.get(p.iso)||0)+1)});maxC=Math.max(1,...counts.values());
  shown=0;$('list').innerHTML='';renderMore();head();dock();draw();
+ if(st.co)stopSpin();else startSpin();
  if(scroll)setTimeout(()=>$('lt').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'}),60);
 }
 function ring(){const A=P.filter(p=>p.iso===st.co&&p.t!=='G'),b=A.filter(p=>marks[K(p)]==='b').length,n=A.length||1,C=2*Math.PI*21;
