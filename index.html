@@ -763,7 +763,7 @@ function renderMore(){
  if(!F.length){list.innerHTML=`<div class="empty"><span class="ei">${ic('compass')}</span><b>Nothing matches yet</b><span>Try removing a filter or two.</span><button id="clearAll">Clear all filters</button></div>`;return}
  list.querySelector('.more')?.remove();
  const next=F.slice(shown,shown+200);let k=0;
- if(shown&&next.length&&next[0].co===F[shown-1].co){const gs=list.querySelectorAll('.grid');while(k<next.length&&next[k].co===next[0].co)k++;gs[gs.length-1].insertAdjacentHTML('beforeend',next.slice(0,k).map(card).join(''))}
+ if(shown&&next.length&&next[0].co===F[shown-1].co){const gs=list.querySelectorAll('.grid,.list-view,.compact-view');while(k<next.length&&next[k].co===next[0].co)k++;gs[gs.length-1].insertAdjacentHTML('beforeend',next.slice(0,k).map(card).join(''))}
  let html='',buf=[];const flush=()=>{if(!buf.length)return;const co=buf[0].co,iso=buf[0].iso,tot=countryTotals.get(co)||0,collapsed=collapsedCountries.has(iso);html+=`<section class="country${collapsed?' collapsed':''}" data-iso="${iso}" data-ct="${buf[0].ct}">${st.co?'':`<button class="country-head" type="button" data-toggle-country="${iso}" aria-expanded="${!collapsed}"><span class="chev">⌄</span><span>${esc(co)} <small>${tot.toLocaleString()} places · ${CONT[buf[0].ct]}</small></span></button>`}<div class="${viewMode==='list'?'list-view':viewMode==='compact'?'compact-view':'grid'}">${buf.map(card).join('')}</div></section>`;buf=[]};
  next.slice(k).forEach(p=>{if(buf.length&&p.co!==buf[0].co)flush();buf.push(p)});flush();
  list.insertAdjacentHTML('beforeend',html);shown+=next.length;
