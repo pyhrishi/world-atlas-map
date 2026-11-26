@@ -783,7 +783,8 @@ function draw(){
  if(!visible)drawMini();
 }
 const mcv=document.getElementById('mini'),mcx=mcv.getContext('2d'),mproj=d3.geoOrthographic().clipAngle(90).scale(31).translate([34,34]),mpath=d3.geoPath(mproj,mcx);
-function drawMini(){if(!G)return;const c=st.co&&G.c[st.co];mproj.rotate(c?[-c[1],-c[0]]:rot);mcx.clearRect(0,0,68,68);mcx.beginPath();mcx.arc(34,34,31,0,7);mcx.fillStyle='#1d2025';mcx.fill();
+let miniCounts=null,miniCo=null,miniRot0=null,miniRot1=null;
+function drawMini(){if(!G)return;if(miniCounts===counts&&miniCo===st.co&&miniRot0===rot[0]&&miniRot1===rot[1])return;miniCounts=counts;miniCo=st.co;miniRot0=rot[0];miniRot1=rot[1];const c=st.co&&G.c[st.co];mproj.rotate(c?[-c[1],-c[0]]:rot);mcx.clearRect(0,0,68,68);mcx.beginPath();mcx.arc(34,34,31,0,7);mcx.fillStyle='#1d2025';mcx.fill();
  for(const f of G.f){mcx.beginPath();mpath(f);mcx.fillStyle=f.i===st.co?'#ff7a5c':counts.get(f.i)?'#9aa1ab':'#3a3e45';mcx.fill()}
  mcx.beginPath();mcx.arc(34,34,31,0,7);mcx.strokeStyle='rgba(255,255,255,.25)';mcx.lineWidth=1.5;mcx.stroke()}
 let sunCache=null,sunT=0;
