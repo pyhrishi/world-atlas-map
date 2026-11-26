@@ -744,7 +744,7 @@ async function hardRefresh(){
    await Promise.all(names.map(n=>caches.delete(n)));
   }
  }catch(e){console.warn('App cache cleanup was incomplete:',e)}
- try{await Promise.all(['index.html','places.json','geo.json','sw.js','manifest.json'].map(f=>fetch(f,{cache:'reload'}).catch(()=>{})))}catch(e){}
+ try{await Promise.all(['index.html','geo.json','sw.js','manifest.json'].map(f=>fetch(f,{cache:'reload'}).catch(()=>{})))}catch(e){}
  const u=new URL(location.href);u.search='';u.searchParams.set('_fresh',Date.now().toString());
  location.replace(u.href);
 }

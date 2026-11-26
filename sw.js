@@ -1,5 +1,5 @@
-const V='atlas-v9-authmsg',APP='app-'+V,PH='photos-v1',API='wiki-v1';
-const CORE=['./','index.html','places.json','geo.json','manifest.json','apple-touch-icon.png','icon-192.png','icon-512.png','https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js'];
+const V='atlas-v10-private',APP='app-'+V,PH='photos-v1',API='wiki-v1';
+const CORE=['./','index.html','geo.json','manifest.json','apple-touch-icon.png','icon-192.png','icon-512.png','https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(APP).then(c=>Promise.all(CORE.map(u=>c.add(new Request(u,{mode:u.startsWith('http')?'no-cors':'same-origin'})).catch(()=>{})))).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>![APP,PH,API].includes(k)).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 async function trim(name,max){const c=await caches.open(name),ks=await c.keys();for(let i=0;i<ks.length-max;i++)await c.delete(ks[i])}
