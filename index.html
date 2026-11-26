@@ -619,9 +619,9 @@ let colSet={},countryTotals=new Map();
 function base(p,skipCo){const q=st.q;return(!st.ct||p.ct===st.ct)&&(skipCo||!st.co||p.iso===st.co)&&(!st.c||p.c===st.c)&&(!st.t||p.t===st.t)&&(st.m<0||(p.mo>>st.m)&1)&&(!st.col||colSet[st.col].has(p))&&(!st.l||marks[K(p)]===st.l)&&(!q||p.s_.includes(q))}
 function apply(scroll){
  F=P.filter(p=>base(p,false));
- if(sortMode==='az')F.sort((a,b)=>a.n.localeCompare(b.n));
- else if(sortMode==='za')F.sort((a,b)=>b.n.localeCompare(a.n));
- else if(sortMode==='tier')F.sort((a,b)=>'LIG'.indexOf(a.t)-'LIG'.indexOf(b.t)||a.co.localeCompare(b.co)||a.n.localeCompare(b.n));
+ if(sortMode==='az')F.sort((a,b)=>a.co.localeCompare(b.co)||a.n.localeCompare(b.n));
+ else if(sortMode==='za')F.sort((a,b)=>a.co.localeCompare(b.co)||b.n.localeCompare(a.n));
+ else if(sortMode==='tier')F.sort((a,b)=>a.co.localeCompare(b.co)||'LIG'.indexOf(a.t)-'LIG'.indexOf(b.t)||a.n.localeCompare(b.n));
  countryTotals=new Map();F.forEach(p=>countryTotals.set(p.co,(countryTotals.get(p.co)||0)+1));
  counts=new Map();P.forEach(p=>{if(base(p,true))counts.set(p.iso,(counts.get(p.iso)||0)+1)});activePickDots=G?G.d.filter(d=>counts.has(d[0])):[];maxC=Math.max(1,...counts.values());
  shown=0;$('list').innerHTML='';renderMore();head();dock();draw();
@@ -772,7 +772,7 @@ function renderMore(){
 $('list').addEventListener('click',e=>{const toggle=e.target.closest('[data-toggle-country]');if(toggle){const iso=toggle.dataset.toggleCountry;if(collapsedCountries.has(iso))collapsedCountries.delete(iso);else collapsedCountries.add(iso);saveCollapsed();const section=toggle.closest('.country');section.classList.toggle('collapsed',collapsedCountries.has(iso));toggle.setAttribute('aria-expanded',String(!collapsedCountries.has(iso)));$('collapseAll').textContent=collapsedCountries.size?'Expand countries':'Collapse countries';return}const m=e.target.closest('.more');if(m){mo.unobserve(m);renderMore();return}const c=e.target.closest('.card');if(c)openP(P[+c.dataset.i])});
 document.querySelector('.view-group').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(!b)return;viewMode=b.dataset.view;document.querySelectorAll('[data-view]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));document.querySelectorAll('#list .grid,#list .list-view,#list .compact-view').forEach(x=>x.className=viewMode==='list'?'list-view':viewMode==='compact'?'compact-view':'grid')});
 $('sortPlaces').addEventListener('change',e=>{sortMode=e.target.value;apply()});
-$('collapseAll').addEventListener('click',()=>{const sections=[...document.querySelectorAll('#list .country')];const shouldCollapse=sections.some(s=>!s.classList.contains('collapsed'));sections.forEach(s=>{const iso=s.dataset.iso;if(shouldCollapse)collapsedCountries.add(iso);else collapsedCountries.delete(iso);s.classList.toggle('collapsed',shouldCollapse);s.querySelector('[data-toggle-country]')?.setAttribute('aria-expanded',String(!shouldCollapse))});saveCollapsed();$('collapseAll').textContent=shouldCollapse?'Expand countries':'Collapse countries'});
+$('collapseAll').addEventListener('click',()=>{const sections=[...document.querySelectorAll('#list .country')],allCollapsed=sections.length&&sections.every(s=>collapsedCountries.has(s.dataset.iso)),shouldCollapse=!allCollapsed;new Set(F.map(p=>p.iso)).forEach(iso=>{if(shouldCollapse)collapsedCountries.add(iso);else collapsedCountries.delete(iso)});sections.forEach(s=>{const iso=s.dataset.iso;s.classList.toggle('collapsed',collapsedCountries.has(iso));s.querySelector('[data-toggle-country]')?.setAttribute('aria-expanded',String(!collapsedCountries.has(iso)))});saveCollapsed();$('collapseAll').textContent=shouldCollapse?'Expand countries':'Collapse countries'});
 
 /* ---------- globe ---------- */
 const cv=$('globe'),cx=cv.getContext('2d');
