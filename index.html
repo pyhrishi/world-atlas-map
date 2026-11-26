@@ -239,7 +239,6 @@ dialog::backdrop{background:#07080acc;backdrop-filter:blur(4px)}
 .links a:hover{border-color:#4a4f58;background:var(--s3)}
 .links a:active{transform:scale(.98)}
 .links svg.i{display:block;flex:none;width:28px;height:28px;margin:0 auto}
-.links .youtube-icon,.links .youtube-icon path{fill:currentColor;stroke:none}
 @media(max-width:480px){.links{gap:7px}.links a{min-height:100px;padding:12px 4px;font-size:12px}.links svg.i{width:25px;height:25px}}
 .ig{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;align-items:center}
 .ig a{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink);text-decoration:none;background:var(--s2);border:1px solid var(--line);border-radius:20px;padding:0 12px;min-height:36px}
@@ -387,7 +386,8 @@ html,body{width:100%;max-width:100%;overflow-x:clip}
 </style>
 </head>
 <body>
-<svg xmlns="http://www.w3.org/2000/svg" style="display:none"><symbol id="i-search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34" />
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+<symbol id="i-youtube" viewBox="0 0 24 24"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34" />
   <circle cx="11" cy="11" r="8" /></symbol><symbol id="i-sliders-horizontal" viewBox="0 0 24 24"><path d="M10 5H3" />
   <path d="M12 19H3" />
   <path d="M14 3v4" />
@@ -560,7 +560,7 @@ html,body{width:100%;max-width:100%;overflow-x:clip}
    <a id="lm" target="_blank" rel="noopener"><svg class="i"><use href="#i-map-pinned"/></svg><span>Google Maps</span></a>
    <a id="le" target="_blank" rel="noopener"><svg class="i"><use href="#i-earth"/></svg><span>Google Earth</span></a>
    <a id="li" target="_blank" rel="noopener"><svg class="i"><use href="#i-camera"/></svg><span>Instagram</span></a>
-   <a id="ly" target="_blank" rel="noopener"><svg class="i youtube-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.2 3.6-6.2 3.6Z" fill="currentColor" stroke="none"/></svg><span>YouTube</span></a>
+   <a id="ly" target="_blank" rel="noopener"><svg class="i"><use href="#i-youtube"/></svg><span>YouTube</span></a>
   </div>
   <div class="ig" id="dig"></div>
   <div class="marks"><button class="mk" data-k="w" id="mw"><svg class="i"><use href="#i-heart"/></svg>Want to go</button><button class="mk" data-k="b" id="mb"><svg class="i"><use href="#i-circle-check"/></svg>Been here</button></div>
@@ -786,12 +786,15 @@ $('list').addEventListener('click',e=>{const m=e.target.closest('.more');if(m){m
 document.querySelector('.view-group').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(!b)return;viewMode=b.dataset.view;document.querySelectorAll('[data-view]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));document.querySelectorAll('#list .grid,#list .list-view').forEach(x=>x.className=viewMode==='list'?'list-view':'grid')});
 $('sortPlaces').addEventListener('change',e=>{sortMode=e.target.value;apply()});
 
+/* ---------- error note ---------- */
+let errShown=0;function reportErr(err){console.error(err);if(/fetch|Load failed|NetworkError|network|aborted|Script error/i.test(String(err&&(err.message||err))))return;if(errShown>2)return;errShown++;let n=document.getElementById('errnote');if(!n){n=document.createElement('div');n.id='errnote';n.style.cssText='position:fixed;left:12px;right:12px;top:calc(12px + env(safe-area-inset-top));z-index:99;background:#3a1f1a;border:1px solid #7a3b2e;color:#ffd9cf;border-radius:14px;padding:10px 14px;font:13px/1.4 Inter,sans-serif';n.onclick=()=>n.remove();document.body.appendChild(n)}n.textContent='Something broke: '+(err&&(err.message||err))+' · tap to hide'}
+addEventListener('error',e=>reportErr(e.error||e.message));addEventListener('unhandledrejection',e=>reportErr(e.reason));
 /* ---------- globe ---------- */
 const cv=$('globe'),cx=cv.getContext('2d');
 let W=0,H=0,R=0,dpr=1,rot=[-78,-18],zoom=1,counts=new Map(),activePickDots=[],maxC=1,hoverIso='',idle=true,lastInt=0,anim=null;
 const proj=d3.geoOrthographic().clipAngle(90).precision(.4);const path=d3.geoPath(proj,cx);const grat=d3.geoGraticule10();
-let GX=0,GY=0;function size(){const b=cv.getBoundingClientRect(),nextDpr=Math.min(2,devicePixelRatio||1);if(b.width===W&&b.height===H&&nextDpr===dpr)return;dpr=nextDpr;W=b.width;H=b.height;cv.width=W*dpr;cv.height=H*dpr;
- if(innerWidth>=900){R=Math.min(W*0.3,(H-230)*0.5);GX=W>1100?W*0.58:W/2;GY=(H-210)/2+14}else{R=Math.min(W,H)*0.45;GX=W/2;GY=H/2}draw()}
+let GX=0,GY=0;function size(){const b=cv.getBoundingClientRect(),nextDpr=Math.max(1,Math.min(2,devicePixelRatio||1,Math.sqrt(3.2e6/Math.max(1,b.width*b.height))));if(b.width===W&&b.height===H&&nextDpr===dpr)return;dpr=nextDpr;W=b.width;H=b.height;cv.width=W*dpr;cv.height=H*dpr;
+ if(innerWidth>=900){R=Math.max(80,Math.min(W*0.3,(H-230)*0.5));GX=W>1100?W*0.58:W/2;GY=(H-210)/2+14}else{R=Math.min(W,H)*0.45;GX=W/2;GY=H/2}draw()}
 function lerp(a,b,t){return a.map((v,i)=>Math.round(v+(b[i]-v)*t))}
 const LO=[58,62,69],HI=[217,221,227];
 function fillFor(iso){
@@ -821,7 +824,7 @@ function draw(){
  const center=[-rot[0],-rot[1]];
  for(const d of G.d){const ll=[d[2],d[1]];if(d3.geoDistance(ll,center)>1.5)continue;const p=proj(ll);const c=counts.get(d[0])||0;if(!c&&d[0]!==st.co)continue;
   const rr=Math.max(2.5,Math.min(7,2+Math.sqrt(c)*.6))*Math.min(1.6,Math.sqrt(zoom));cx.beginPath();cx.arc(p[0],p[1],rr,0,7);cx.fillStyle=d[0]===st.co?'#ff7a5c':fillFor(d[0]);cx.fill();cx.lineWidth=1;cx.strokeStyle=d[0]===hoverIso?'#fff':'rgba(19,20,23,.9)';cx.stroke()}
- // night side with soft terminator and warm lights where places cluster
+ try{ // night side with soft terminator and warm lights where places cluster
  const anti=antiSun();
  for(let rad=91;rad>=76;rad-=1){cx.beginPath();path(d3.geoCircle().center(anti).radius(rad).precision(3)());cx.fillStyle='rgba(4,5,7,.034)';cx.fill()}
  for(const [iso,c] of counts){const ll=G.c[iso];if(!ll)continue;const pt=[ll[1],ll[0]];if(d3.geoDistance(pt,anti)>1.35||d3.geoDistance(pt,center)>1.45)continue;const q=proj(pt);const rr=1.2+Math.min(5,Math.sqrt(c)*.35);const gl=cx.createRadialGradient(q[0],q[1],0,q[0],q[1],rr*3);gl.addColorStop(0,'rgba(255,214,150,.75)');gl.addColorStop(1,'rgba(255,214,150,0)');cx.fillStyle=gl;cx.beginPath();cx.arc(q[0],q[1],rr*3,0,7);cx.fill()}
@@ -831,6 +834,7 @@ function draw(){
  for(const [iso,o] of mk){const ll=G.c[iso];if(!ll)continue;const pt=[ll[1],ll[0]];if(d3.geoDistance(pt,center)>1.45)continue;const q=proj(pt);
   const dot=(n,col,dx)=>{if(!n)return;const rr=(3+Math.min(6,Math.sqrt(n)*1.6))*Math.min(1.5,Math.sqrt(zoom));const x=q[0]+dx,y=q[1];const gl=cx.createRadialGradient(x,y,0,x,y,rr*2.6);gl.addColorStop(0,col+'88');gl.addColorStop(1,col+'00');cx.fillStyle=gl;cx.beginPath();cx.arc(x,y,rr*2.6,0,7);cx.fill();cx.beginPath();cx.arc(x,y,rr,0,7);cx.fillStyle=col;cx.fill();cx.lineWidth=1.5;cx.strokeStyle='#131417';cx.stroke()};
   const both=o.w&&o.b;dot(o.b,'#6fd3a6',both?-5:0);dot(o.w,'#ff7a5c',both?5:0)}
+ }catch(err){reportErr(err)}
  // shading for 3D
  g=cx.createRadialGradient(cxp-r*.4,cyp-r*.45,0,cxp,cyp,r);g.addColorStop(0,'rgba(255,255,255,.10)');g.addColorStop(.5,'rgba(255,255,255,0)');g.addColorStop(.85,'rgba(0,0,0,.18)');g.addColorStop(1,'rgba(0,0,0,.55)');cx.fillStyle=g;cx.beginPath();cx.arc(cxp,cyp,r,0,7);cx.fill();
  cx.beginPath();cx.arc(cxp,cyp,r,0,7);cx.strokeStyle='rgba(255,255,255,.12)';cx.lineWidth=1;cx.stroke();
@@ -883,11 +887,12 @@ $('px').onclick=()=>{st.co='';zoom=Math.max(1,zoom/2);apply()};
 let lastT=0,spinRaf=0,visible=true;
 const reduceMotion=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
 const stopSpin=()=>{if(spinRaf)cancelAnimationFrame(spinRaf);spinRaf=0;lastT=0};
-const startSpin=()=>{if(!spinRaf&&visible&&!document.hidden&&!st.co&&!reduceMotion())spinRaf=requestAnimationFrame(spin)};
+const startSpin=()=>{if(!spinRaf&&visible&&!document.hidden&&!st.co)spinRaf=requestAnimationFrame(spin)};
 const spin=t=>{
- if(!visible||document.hidden||st.co||reduceMotion()){stopSpin();return}
- if(lastT&& !drag && t-lastInt>3500){rot=[rot[0]+(t-lastT)*.006,rot[1]];draw()}
- lastT=t;spinRaf=requestAnimationFrame(spin)
+ if(!visible||document.hidden||st.co){stopSpin();return}
+ spinRaf=requestAnimationFrame(spin);
+ const dt=lastT?Math.min(100,t-lastT):0;lastT=t;
+ if(dt&&!drag&&t-lastInt>3500){rot=[rot[0]+dt*(reduceMotion()?.002:.006),rot[1]];try{draw()}catch(err){reportErr(err)}}
 };
 document.addEventListener('visibilitychange',()=>document.hidden?stopSpin():startSpin());
 new IntersectionObserver(es=>{
