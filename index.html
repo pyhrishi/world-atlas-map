@@ -323,11 +323,11 @@ input:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(-
 .card.lp{transform:scale(.97);border-color:#5a6069}
 /* jump rail */
 .rail{position:fixed;right:6px;top:50%;transform:translateY(-50%);z-index:17;display:none;flex-direction:column;gap:2px;padding:6px 4px;border-radius:16px;background:#1b1d21cc;border:1px solid var(--line);backdrop-filter:blur(10px);touch-action:none}
-.rail.on{display:flex}
+.rail.on{display:flex;opacity:0;pointer-events:none;transition:opacity .25s}
+.rail.on.show,.rail.on:hover{opacity:1;pointer-events:auto}
 .rail button{all:unset;cursor:pointer;font:600 11px Inter,sans-serif;color:var(--dim);width:30px;height:32px;display:grid;place-items:center;border-radius:10px}
 .rail button.cur{color:var(--bg);background:var(--ink)}
 @media(min-width:641px){.rail{right:12px}.rail button{width:36px}}
-@media(max-width:640px){.wrap{padding-right:46px}}
 /* photos */
 .cic.hp{background-size:cover;background-position:center;border:1px solid #ffffff14}
 .cic.hp svg{display:none}
@@ -667,7 +667,8 @@ function jumpCt(ct){const i=F.findIndex(p=>p.ct===ct);if(i<0)return;while(shown<
  const sec=[...document.querySelectorAll('#list .country')].find(x=>x.dataset.ct===ct);if(sec){scrollTo({top:sec.getBoundingClientRect().top+scrollY-60});railCur()}}
 {let last='';const r=$('rail');const go=e=>{const b=document.elementFromPoint(e.clientX,e.clientY)?.closest('.rail button');if(b&&b.dataset.ct!==last){last=b.dataset.ct;buzz();jumpCt(last)}};
  r.addEventListener('pointerdown',e=>{last='';r.setPointerCapture(e.pointerId);go(e)});r.addEventListener('pointermove',e=>{if(e.buttons||e.pointerType==='touch')go(e)});r.addEventListener('pointerup',()=>last='')}
-addEventListener('scroll',()=>railCur(),{passive:true});
+{let rt;const r=$('rail');const show=()=>{r.classList.add('show');clearTimeout(rt);rt=setTimeout(()=>{if(!r.matches(':active'))r.classList.remove('show')},1600)};
+ addEventListener('scroll',()=>{railCur();show()},{passive:true});r.addEventListener('pointerdown',show);r.addEventListener('pointermove',show)}
 /* ---------- search suggestions ---------- */
 let recent=[];try{recent=JSON.parse(localStorage.getItem('atlas10k-recent')||'[]')}catch(e){}
 const remember=q=>{q=q.trim();if(q.length<2)return;recent=[q,...recent.filter(x=>x.toLowerCase()!==q.toLowerCase())].slice(0,6);try{localStorage.setItem('atlas10k-recent',JSON.stringify(recent))}catch(e){}};
