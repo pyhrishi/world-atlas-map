@@ -58,10 +58,21 @@ h1 em{color:var(--mute)}
 .csearch{display:flex;align-items:center;gap:8px;background:var(--s3);border-radius:14px;padding:0 12px;min-height:46px;margin:4px 0 6px}
 .csearch input{flex:1;border:0;background:none;color:var(--ink);font:16px Inter,sans-serif;outline:none}
 .clist h4{font:600 12px Inter,sans-serif;color:var(--dim);margin:16px 0 6px;position:sticky;top:0;background:var(--s1);padding:4px 0}
-.copt{display:flex;justify-content:space-between;align-items:center;width:100%;border:0;background:transparent;border-radius:12px;padding:0 12px;min-height:44px;cursor:pointer;text-align:left}
+.cfilter{display:flex;gap:7px;overflow-x:auto;padding:5px 0 9px;margin:2px -2px 8px;scrollbar-width:none}
+.cfilter::-webkit-scrollbar{display:none}
+.cfilter button{flex:none;border:1px solid var(--line);background:var(--s2);color:var(--mute);border-radius:24px;padding:7px 12px;font-size:12px;cursor:pointer}
+.cfilter button[aria-pressed=true]{background:#3a2621;border-color:#754538;color:#ff9b82}
+.cmeta{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:8px 0 4px;color:var(--dim);font-size:12px}
+.csort{border:0;background:transparent;color:var(--mute);font:600 12px Inter,sans-serif;cursor:pointer;padding:6px}
+.clist h4{display:flex;align-items:center;gap:8px;font:600 12px Inter,sans-serif;color:var(--dim);margin:16px 0 6px;position:sticky;top:0;background:var(--s1);padding:7px 0;z-index:1}
+.copt{display:grid;grid-template-columns:38px minmax(0,1fr) auto;align-items:center;gap:10px;width:100%;border:0;background:transparent;border-radius:13px;padding:5px 12px;min-height:54px;cursor:pointer;text-align:left}
 .copt:hover{background:var(--s2)}
 .copt[aria-pressed=true]{background:#3a2621;color:var(--acc)}
-.copt em{font-style:normal;color:var(--dim);font-size:13px;font-variant-numeric:tabular-nums}
+.cflag{width:32px;height:26px;display:grid;place-items:center;font-size:24px;line-height:1;border-radius:6px;background:var(--s2);box-shadow:0 1px 3px #0005}
+.cname{font-weight:500;line-height:1.25}
+.csub{display:block;color:var(--dim);font-size:11px;margin-top:3px}
+.copt em{font-style:normal;color:var(--dim);font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cempty{padding:24px 8px;text-align:center;color:var(--mute);font-size:14px}
 .legend{display:flex;gap:6px 12px;font-size:12px;color:var(--dim);flex-wrap:wrap;justify-content:center}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
 /* collections */
@@ -520,7 +531,7 @@ html,body{width:100%;max-width:100%;overflow-x:clip}
 </dialog>
 
 <dialog class="sheet" id="cs" aria-labelledby="csh"><div class="sh"><h3 id="csh">Choose a country</h3><button class="x" data-close aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
- <div class="sb"><label class="csearch"><svg class="i"><use href="#i-search"/></svg><input id="cq" type="search" placeholder="Type a country" autocomplete="off"></label><div class="clist" id="clist"></div></div>
+ <div class="sb"><label class="csearch"><svg class="i"><use href="#i-search"/></svg><input id="cq" type="search" placeholder="Search country or territory" autocomplete="off"></label><div class="cfilter" id="cfilter" aria-label="Filter by continent"></div><div class="cmeta"><span id="csummary">Browse countries and territories</span><button class="csort" id="csort" type="button">Sort: Most places ↓</button></div><div class="clist" id="clist"></div></div>
  <div class="sf"><button class="btn" id="cany">Any country</button></div>
 </dialog>
 <dialog class="sheet" id="dd" aria-labelledby="dn">
@@ -881,13 +892,26 @@ $('fs').addEventListener('close',()=>apply(true));$('ms').addEventListener('clos
 
 
 /* ---------- country picker ---------- */
-let CL=[];
-function countryList(){const q=$('cq').value.trim().toLowerCase();const groups={};
- CL.filter(c=>!q||c.n.toLowerCase().includes(q)).forEach(c=>(groups[c.ct]=groups[c.ct]||[]).push(c));
- $('clist').innerHTML=Object.keys(CONT).filter(k=>groups[k]).map(k=>`<h4>${CONT[k]}</h4>`+groups[k].map(c=>`<button class="copt" data-iso="${c.iso}" aria-pressed="${st.co===c.iso}"><span>${esc(c.n)}</span><em>${c.k} places</em></button>`).join('')).join('')||'<p style="color:var(--mute)">No country matches.</p>'}
+let CL=[],countryContinentFilter='',countrySort='count';
+const flagFor=iso=>{const s=String(iso||'').toUpperCase();return /^[A-Z]{2}$/.test(s)?String.fromCodePoint(...[...s].map(c=>127397+c.charCodeAt(0))):'🌐'};
+function countryFilters(){
+ const opts=[['','All continents'],...Object.entries(CONT)];
+ $('cfilter').innerHTML=opts.map(([k,v])=>'<button type="button" data-ct="'+k+'" aria-pressed="'+(countryContinentFilter===k)+'">'+v+'</button>').join('');
+}
+function countryList(){
+ const q=$('cq').value.trim().toLowerCase();
+ let list=CL.filter(c=>(!countryContinentFilter||c.ct===countryContinentFilter)&&(!q||c.n.toLowerCase().includes(q)||c.iso.toLowerCase()===q));
+ list.sort((a,b)=>countrySort==='count'?(b.k-a.k||a.n.localeCompare(b.n)):a.n.localeCompare(b.n));
+ $('csummary').textContent=list.length+' of '+CL.length+' countries & territories · '+list.reduce((n,c)=>n+c.k,0).toLocaleString()+' places';
+ $('csort').textContent=countrySort==='count'?'Sort: Most places ↓':'Sort: A–Z ↑';
+ const groups={};list.forEach(c=>(groups[c.ct]=groups[c.ct]||[]).push(c));
+ $('clist').innerHTML=Object.keys(CONT).filter(k=>groups[k]).map(k=>'<h4>'+CONT[k]+' <span style="font-weight:400">· '+groups[k].length+'</span></h4>'+groups[k].map(c=>'<button class="copt" data-iso="'+c.iso+'" aria-pressed="'+(st.co===c.iso)+'"><span class="cflag" aria-hidden="true">'+flagFor(c.iso)+'</span><span><span class="cname">'+esc(c.n)+'</span><small class="csub">'+c.iso+' · '+CONT[c.ct]+'</small></span><em>'+c.k.toLocaleString()+' places</em></button>').join('')).join('')||'<p class="cempty">No countries match. Try another name or continent.</p>';
+}
 let fromFilters=false;
-function openCountries(ff){fromFilters=ff;$('cq').value='';countryList();$('cs').showModal();if(innerWidth>640)$('cq').focus()}
+function openCountries(ff){fromFilters=ff;countryContinentFilter='';countrySort='count';$('cq').value='';countryFilters();countryList();$('cs').showModal();if(innerWidth>640)$('cq').focus()}
 $('cq').addEventListener('input',countryList);
+$('cfilter').addEventListener('click',e=>{const b=e.target.closest('button[data-ct]');if(!b)return;countryContinentFilter=b.dataset.ct;countryFilters();countryList()});
+$('csort').addEventListener('click',()=>{countrySort=countrySort==='count'?'az':'count';countryList()});
 $('clist').onclick=e=>{const b=e.target.closest('.copt');if(!b)return;st.co=b.dataset.iso;flyTo(st.co);$('cs').close();if(fromFilters){fillFilters()}apply(!fromFilters)};
 $('cany').onclick=()=>{st.co='';$('cs').close();if(fromFilters)fillFilters();apply()};
 $('cpick').onclick=()=>openCountries(false);
@@ -953,7 +977,7 @@ Promise.all([fetch('places.json').then(r=>r.json()),fetch('geo.json').then(r=>r.
  P.sort((a,b)=>ord[a.ct]-ord[b.ct]||cc[b.co]-cc[a.co]||a.co.localeCompare(b.co)||to[a.t]-to[b.t]||a.i0-b.i0);
  PK=new Map(P.map(p=>[K(p),p]));P.forEach((p,i)=>{p.i=i;p.x=(p.n+' '+p.h).toLowerCase();p.s_=(p.n+' '+p.co+' '+CONT[p.ct]+' '+p.h+' '+CAT[p.c][0]).toLowerCase();p.mo=months(p.s)});
  COLS.forEach(c=>colSet[c[0]]=new Set(P.filter(c[3])));
- {const m=new Map();P.forEach(p=>{const c=m.get(p.iso)||{iso:p.iso,n:p.co,ct:p.ct,k:0};c.k++;m.set(p.iso,c)});CL=[...m.values()].sort((a,b)=>a.n.localeCompare(b.n));countryNameByIso=new Map(CL.map(c=>[c.iso,c.n]))}
+ {const m=new Map();P.forEach(p=>{const c=m.get(p.iso)||{iso:p.iso,n:p.co,ct:p.ct,k:0};c.k++;m.set(p.iso,c)});CL=[...m.values()].sort((a,b)=>a.n.localeCompare(b.n));countryNameByIso=new Map(CL.map(c=>[c.iso,c.n]));countryFilters();}
  G={f:g.f.map(f=>({type:'Feature',i:f.i,geometry:{type:f.t,coordinates:f.c}})),d:g.d,c:g.c};G.byIso={};G.f.forEach(f=>{if(f.i)G.byIso[f.i]=f});
  const cn=new Set(P.map(p=>p.iso)).size,tc=t=>P.filter(p=>p.t===t).length;
  $('stats').innerHTML=`<div><b>${P.length.toLocaleString()}</b><span>places</span></div><div><b>${cn}</b><span>countries & territories</span></div><div><b>${tc('L')}</b><span>Legendary</span></div>`;
