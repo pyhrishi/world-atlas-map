@@ -233,10 +233,14 @@ dialog::backdrop{background:#07080acc;backdrop-filter:blur(4px)}
 .rows div{background:var(--s2);border-radius:14px;padding:10px 12px}
 .rows span{display:block;font-size:11px;color:var(--dim)}
 .rows b{font-size:14px;font-weight:600}
-.links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.links a{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 6px;border-radius:16px;text-decoration:none;color:var(--ink);background:var(--s2);border:1px solid var(--line);font-size:13px;font-weight:600}
+.links{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;align-items:stretch}
+.links a{box-sizing:border-box;min-width:0;min-height:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:14px 8px;border-radius:18px;text-align:center;text-decoration:none;color:var(--ink);background:var(--s2);border:1px solid var(--line);font-size:14px;font-weight:600;line-height:1.2;transition:background .2s,border-color .2s,transform .2s}
 .links a:hover{border-color:#4a4f58;background:var(--s3)}
-.links svg.i{width:24px;height:24px}
+.links a:active{transform:scale(.98)}
+.links svg.i{display:block;flex:none;width:28px;height:28px;margin:0 auto}
+.links .link-sub{display:block;max-width:100%;font-size:11px;line-height:1.2;color:var(--dim);font-weight:400;overflow-wrap:anywhere}
+.links .youtube-icon{fill:currentColor}
+@media(max-width:480px){.links{gap:7px}.links a{min-height:100px;padding:12px 4px;font-size:12px}.links svg.i{width:25px;height:25px}}
 .ig{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;align-items:center}
 .ig a{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink);text-decoration:none;background:var(--s2);border:1px solid var(--line);border-radius:20px;padding:0 12px;min-height:36px}
 .ig a:hover{border-color:#4a4f58;background:var(--s3)}
@@ -553,9 +557,10 @@ html,body{width:100%;max-width:100%;overflow-x:clip}
   <div class="wk" id="dwk"></div>
   <div class="rows" id="drows"></div>
   <div class="links">
-   <a id="lm" target="_blank" rel="noopener"><svg class="i"><use href="#i-map-pinned"/></svg>Google Maps</a>
-   <a id="le" target="_blank" rel="noopener"><svg class="i"><use href="#i-earth"/></svg>Google Earth</a>
-   <a id="li" target="_blank" rel="noopener"><svg class="i"><use href="#i-camera"/></svg><span>Instagram</span><span id="lit" style="font-weight:400;font-size:11px;color:var(--dim);overflow-wrap:anywhere"></span></a>
+   <a id="lm" target="_blank" rel="noopener"><svg class="i"><use href="#i-map-pinned"/></svg><span>Google Maps</span></a>
+   <a id="le" target="_blank" rel="noopener"><svg class="i"><use href="#i-earth"/></svg><span>Google Earth</span></a>
+   <a id="li" target="_blank" rel="noopener"><svg class="i"><use href="#i-camera"/></svg><span>Instagram</span><span id="lit" class="link-sub"></span></a>
+   <a id="ly" target="_blank" rel="noopener"><svg class="i youtube-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.2 3.6-6.2 3.6Z"/></svg><span>YouTube</span></a>
   </div>
   <div class="ig" id="dig"></div>
   <div class="marks"><button class="mk" data-k="w" id="mw"><svg class="i"><use href="#i-heart"/></svg>Want to go</button><button class="mk" data-k="b" id="mb"><svg class="i"><use href="#i-circle-check"/></svg>Been here</button></div>
@@ -960,7 +965,7 @@ function openP(p){
  $('dw').innerHTML=`${ic('map-pinned')}${esc(p.co)} · ${CONT[p.ct]}`;$('dn').textContent=p.n;$('dhk').textContent=p.h;
  $('drows').innerHTML=`<div><span>Best time</span><b>${esc(p.s)}</b></div><div><span>Type</span><b>${CAT[p.c][0]}</b></div><div><span>Tier</span><b style="color:${p.t==='L'?'var(--acc)':p.t==='I'?'var(--gold)':'inherit'}">${TIER[p.t]}</b></div>`;
  const q=encodeURIComponent(p.n+', '+p.co);
- $('lm').href='https://www.google.com/maps/search/?api=1&query='+q;$('le').href='https://earth.google.com/web/search/'+q;
+ $('lm').href='https://www.google.com/maps/search/?api=1&query='+q;$('le').href='https://earth.google.com/web/search/'+q;$('ly').href='https://www.youtube.com/results?search_query='+q;
  const tags=igTags(p);$('li').href='https://www.instagram.com/explore/tags/'+tags[0]+'/';$('lit').textContent='#'+tags[0];
  $('dig').innerHTML=tags.slice(1).map(t=>`<a href="https://www.instagram.com/explore/tags/${t}/" target="_blank" rel="noopener">#${t}</a>`).join('')+`<a class="g" href="https://www.google.com/search?q=${encodeURIComponent('site:instagram.com "'+p.n+'" '+p.co)}" target="_blank" rel="noopener">${ic('search')}Search posts and reels</a>`;
  marksUI();
