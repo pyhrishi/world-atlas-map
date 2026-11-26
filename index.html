@@ -349,6 +349,10 @@ input:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(-
 .tbar.on{transform:none}
 .country h3{top:calc(56px + env(safe-area-inset-top))}
 html{scroll-padding-top:calc(60px + env(safe-area-inset-top))}
+/* Prevent page-level horizontal overflow on narrow screens. Keep intentional carousels independently scrollable. */
+html,body{width:100%;max-width:100%;overflow-x:clip}
+.dock,.sug{max-width:calc(100% - 20px)}
+@media(max-width:640px){.sheet{width:100%;max-width:100%;margin-inline:0}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
