@@ -95,45 +95,19 @@ h1 em{color:var(--mute)}
 .chip-on{display:flex;align-items:center;gap:6px;font-size:13px;background:var(--s2);border:1px solid var(--line);border-radius:30px;padding:4px 6px 4px 12px}
 .chip-on button{border:0;background:var(--s3);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;cursor:pointer}
 .chip-on svg.i{width:14px;height:14px}
-.country{margin-top:30px;content-visibility:auto;contain-intrinsic-size:auto 520px}
-.country-head{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:10px;width:100%;padding:12px 10px 10px 0;border:0;background:linear-gradient(var(--bg) 70%,#13141700);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);font:400 26px/1.1 "Instrument Serif",serif;text-align:left;cursor:pointer;transition:color .22s ease,padding-left .28s cubic-bezier(.2,.8,.2,1)}
-.country-head:hover{color:var(--acc);padding-left:3px}
-.country-head:focus-visible{outline:2px solid var(--acc);outline-offset:3px;border-radius:10px}
-.country-head .chev{width:28px;height:28px;display:grid;place-items:center;border:1px solid var(--line);border-radius:9px;background:var(--s1);font:500 15px Inter,sans-serif;color:var(--mute);transition:transform .42s cubic-bezier(.2,.8,.2,1),background .25s,border-color .25s,color .25s}
-.country-head:hover .chev{background:var(--s2);border-color:#754538;color:var(--acc)}
-.country.collapsed .country-head .chev{transform:rotate(-90deg)}
+.country{margin-top:30px}
+.country-head{display:flex;align-items:center;gap:10px;width:100%;padding:12px 0 10px;border:0;background:transparent;color:var(--ink);font:400 26px/1.1 "Instrument Serif",serif;text-align:left}
 .country-head small{font:500 13px Inter,sans-serif;color:var(--dim)}
-.country-content{display:grid;grid-template-rows:1fr;transition:grid-template-rows .46s cubic-bezier(.22,1,.36,1);will-change:grid-template-rows}
-.country-inner{min-height:0;overflow:hidden;opacity:1;transform:translateY(0);filter:blur(0);transition:opacity .25s ease,transform .42s cubic-bezier(.22,1,.36,1),filter .3s ease}
-.country.collapsed .country-content{grid-template-rows:0fr}
-.country.collapsed .country-inner{opacity:0;transform:translateY(-9px);filter:blur(3px);pointer-events:none}
-@media(prefers-reduced-motion:reduce){.country-content,.country-inner,.country-head,.country-head .chev{transition:none!important;filter:none!important;transform:none!important}}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
 .list-view{display:flex;flex-direction:column;gap:7px}
 .list-view .card{grid-template-columns:40px minmax(0,1fr);padding:12px 14px}
 .list-view .card .h{display:block}
 .list-view .card .meta{margin-top:5px}
-.directory-view{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:24px;row-gap:0}
-.directory-view .card{display:grid;grid-template-columns:26px minmax(0,1fr);align-items:center;gap:9px;min-height:54px;padding:8px 4px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;transition:background .2s,padding-left .22s}
-.directory-view .card:hover{background:var(--s1);padding-left:9px}
-.directory-view .card .cic{width:26px;height:26px;border-radius:8px}
-.directory-view .card .h{display:none}
-.directory-view .card .meta{margin-top:3px;gap:7px;font-size:11px}
-.directory-view .card .sbar{display:none}
-@media(max-width:560px){.directory-view{grid-template-columns:1fr;column-gap:0}}
 .lhead-main{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%}
-.view-toggle{display:inline-flex;align-items:center;gap:8px;min-height:42px;padding:0 13px;border:1px solid var(--line);border-radius:13px;background:var(--s1);color:var(--ink);font:600 13px Inter,sans-serif;cursor:pointer;touch-action:manipulation;transition:background .2s,border-color .2s,transform .2s}
-.view-toggle:active{transform:scale(.97)}.view-toggle[aria-expanded=true]{background:var(--s2);border-color:#754538}
-.view-toggle>.i{width:17px;height:17px}.view-toggle .view-chevron{width:14px;height:14px;color:var(--dim);transition:transform .35s cubic-bezier(.2,.8,.2,1)}.view-toggle[aria-expanded=true] .view-chevron{transform:rotate(180deg)}
-.view-panel{display:grid;grid-template-rows:0fr;opacity:0;transform:translateY(-8px);transition:grid-template-rows .38s cubic-bezier(.22,1,.36,1),opacity .24s ease,transform .38s cubic-bezier(.22,1,.36,1);will-change:grid-template-rows}
-.view-panel.open{grid-template-rows:1fr;opacity:1;transform:translateY(0)}.view-panel-inner{min-height:0;overflow:hidden}
-.view-tools{display:flex;align-items:center;justify-content:flex-start;gap:10px;flex-wrap:wrap;padding:12px;margin:8px 0 12px;background:var(--s1);border:1px solid var(--line);border-radius:16px}
-.view-group{display:flex;gap:3px;padding:3px;background:var(--s2);border:1px solid var(--line);border-radius:12px}
-.view-group button,.sort-select{min-height:38px;border:0;border-radius:9px;background:transparent;color:var(--mute);padding:0 11px;font:500 12px Inter,sans-serif;cursor:pointer;touch-action:manipulation}
-.view-group button[aria-pressed=true]{background:var(--s3);color:var(--ink);box-shadow:0 1px 4px #0004}
-.sort-label{display:flex;align-items:center;gap:8px;color:var(--dim);font-size:12px}
-.sort-select{border:1px solid var(--line);background:var(--s2);color:var(--ink);padding:0 10px}
-@media(max-width:560px){.lhead-main{align-items:flex-start}.view-toggle{min-height:40px;padding:0 10px}.view-tools{gap:8px;padding:10px}.sort-label{width:100%;justify-content:space-between}.sort-label .sort-select{flex:1;max-width:65%}.view-group{width:100%}.view-group button{flex:1}}
+.inline-view{flex:none;display:flex;gap:3px;padding:3px;background:var(--s1);border:1px solid var(--line);border-radius:12px}
+.inline-view button{min-height:36px;border:0;border-radius:9px;background:transparent;color:var(--mute);padding:0 13px;font:600 12px Inter,sans-serif;cursor:pointer;touch-action:manipulation}
+.inline-view button[aria-pressed=true]{background:var(--s3);color:var(--ink);box-shadow:0 1px 4px #0004}
+@media(max-width:560px){.lhead-main{align-items:center}.inline-view button{padding:0 10px;min-height:34px}}
 .card{all:unset;box-sizing:border-box;display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;padding:14px;background:var(--s1);border:1px solid var(--line);border-radius:var(--r);cursor:pointer;transition:border-color .15s,background .15s}
 .card:hover{border-color:#4a4f58;background:var(--s2)}
 .card:focus-visible{outline:2px solid var(--acc)}
@@ -223,6 +197,7 @@ dialog::backdrop{background:#07080acc;backdrop-filter:blur(4px)}
 .sheet{width:min(560px,100vw);max-height:86svh;border-radius:24px;overflow:auto}
 @media(max-width:640px){.sheet{margin:auto 0 0;max-width:100vw;width:100vw;border-radius:24px 24px 0 0;border-bottom:0}}
 .sh{position:sticky;top:0;background:var(--s1);display:flex;justify-content:space-between;align-items:center;padding:18px 20px 10px;z-index:1}
+.filter-sort{min-height:36px;max-width:150px;border:1px solid var(--line);border-radius:9px;background:var(--s2);color:var(--ink);padding:0 10px;font:500 12px Inter,sans-serif}
 .sh h3{font:400 28px/1 "Instrument Serif",serif;margin:0}
 .x{width:40px;height:40px;border-radius:50%;border:0;background:var(--s3);display:grid;place-items:center;cursor:pointer}
 .sb{padding:4px 20px 22px}
@@ -524,8 +499,7 @@ html,body{width:100%;max-width:100%;overflow-x:clip}
 <div class="wrap">
  <div class="sec-h"><h2>Collections</h2><p>Tap one to filter the list and the globe</p></div>
  <div class="cols" id="cols"></div>
- <div class="lhead"><div class="lhead-main"><div><h2 id="lt">All places</h2><p id="ls"></p></div><button class="view-toggle" id="viewToggle" type="button" aria-expanded="false" aria-controls="viewPanel"><svg class="i"><use href="#i-sliders-horizontal"/></svg><span>View & sort</span><svg class="i view-chevron"><use href="#i-chevron-down"/></svg></button></div><div class="chips-on" id="active"></div></div>
- <div class="view-panel" id="viewPanel" aria-hidden="true"><div class="view-panel-inner" inert><div class="view-tools" aria-label="Destination display options"><div class="view-group" role="group" aria-label="Layout"><button type="button" data-view="grid" aria-pressed="true">Cards</button><button type="button" data-view="list" aria-pressed="false">List</button><button type="button" data-view="directory" aria-pressed="false">Directory</button></div><label class="sort-label">Sort destinations<select class="sort-select" id="sortPlaces" aria-label="Sort destinations"><option value="recommended">Recommended</option><option value="az">Name A–Z</option><option value="za">Name Z–A</option><option value="tier">Tier first</option></select></label><button class="sort-select" id="collapseAll" type="button">Collapse countries</button></div></div></div>
+ <div class="lhead"><div class="lhead-main"><div><h2 id="lt">All places</h2><p id="ls"></p></div><div class="view-group inline-view" role="group" aria-label="Destination layout"><button type="button" data-view="grid" aria-pressed="true">Cards</button><button type="button" data-view="list" aria-pressed="false">List</button></div></div><div class="chips-on" id="active"></div></div>
  <div class="cband" id="cband"></div>
  <div class="qchips" id="qc"></div>
  <main id="list"><div class="sk" style="margin-top:10px"></div><div class="sk" style="margin-top:10px"></div><div class="sk" style="margin-top:10px"></div><div class="sk" style="margin-top:10px"></div><div class="sk" style="margin-top:10px"></div><div class="sk" style="margin-top:10px"></div></main>
@@ -544,7 +518,7 @@ html,body{width:100%;max-width:100%;overflow-x:clip}
  <button class="db" id="br" aria-label="Surprise me"><svg class="i"><use href="#i-shuffle"/></svg></button>
 </nav>
 
-<dialog class="sheet" id="fs" aria-labelledby="fsh"><div class="sh"><h3 id="fsh">Filters</h3><button class="x" data-close aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
+<dialog class="sheet" id="fs" aria-labelledby="fsh"><div class="sh"><h3 id="fsh">Filters</h3><select class="sort-select filter-sort" id="sortPlaces" aria-label="Sort destinations"><option value="recommended">Recommended</option><option value="az">Name A–Z</option><option value="za">Name Z–A</option><option value="tier">Tier first</option></select><button class="x" data-close aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
  <div class="sb">
   <div class="lbl"><svg class="i"><use href="#i-map-pinned"/></svg>Country</div><button class="crow2" id="fco"><b id="fcon">Any country</b><span>Change ›</span></button>
   <div class="lbl"><svg class="i"><use href="#i-globe"/></svg>Continent</div><div class="chips" id="fct"></div>
@@ -622,9 +596,7 @@ function months(s){s=s.toLowerCase();if(/year|monthly|twice/.test(s))return 4095
 
 let P=[],F=[],G=null,shown=0,cur=null;
 const st={q:'',ct:'',co:'',c:'',t:'',m:-1,col:'',l:''};
-let viewMode='grid',sortMode='recommended',collapsedCountries=new Set();
-try{collapsedCountries=new Set(JSON.parse(localStorage.getItem('atlas10k-collapsed')||'[]'))}catch(e){}
-const saveCollapsed=()=>{try{localStorage.setItem('atlas10k-collapsed',JSON.stringify([...collapsedCountries]))}catch(e){}};
+let viewMode='grid',sortMode='recommended';
 let marks={};
 try{marks=JSON.parse(localStorage.getItem('atlas10k-marks')||'{}');const old=JSON.parse(localStorage.getItem('atlas5k')||'[]');old.forEach(k=>{if(!marks[k])marks[k]='w'})}catch(e){}
 const save=()=>{try{localStorage.setItem('atlas10k-marks',JSON.stringify(marks))}catch(e){}};
@@ -781,18 +753,14 @@ function renderMore(){
  if(!F.length){list.innerHTML=`<div class="empty"><span class="ei">${ic('compass')}</span><b>Nothing matches yet</b><span>Try removing a filter or two.</span><button id="clearAll">Clear all filters</button></div>`;return}
  list.querySelector('.more')?.remove();
  const next=F.slice(shown,shown+200);let k=0;
- if(shown&&next.length&&next[0].co===F[shown-1].co){const gs=list.querySelectorAll('.grid,.list-view,.directory-view');while(k<next.length&&next[k].co===next[0].co)k++;gs[gs.length-1].insertAdjacentHTML('beforeend',next.slice(0,k).map(card).join(''))}
- let html='',buf=[];const flush=()=>{if(!buf.length)return;const co=buf[0].co,iso=buf[0].iso,tot=countryTotals.get(co)||0,collapsed=collapsedCountries.has(iso);html+=`<section class="country${collapsed?' collapsed':''}" data-iso="${iso}" data-ct="${buf[0].ct}">${st.co?'':`<button class="country-head" type="button" data-toggle-country="${iso}" aria-expanded="${!collapsed}"><span class="chev">⌄</span><span>${esc(co)} <small>${tot.toLocaleString()} places · ${CONT[buf[0].ct]}</small></span></button>`}<div class="country-content"><div class="country-inner" ${collapsed?'aria-hidden="true"':''}><div class="${viewMode==='list'?'list-view':viewMode==='directory'?'directory-view':'grid'}">${buf.map(card).join('')}</div></div></div></section>`;buf=[]};
+ if(shown&&next.length&&next[0].co===F[shown-1].co){const gs=list.querySelectorAll('.grid,.list-view');while(k<next.length&&next[k].co===next[0].co)k++;gs[gs.length-1].insertAdjacentHTML('beforeend',next.slice(0,k).map(card).join(''))}
+ let html='',buf=[];const flush=()=>{if(!buf.length)return;const co=buf[0].co,tot=countryTotals.get(co)||0;html+=`<section class="country" data-ct="${buf[0].ct}">${st.co?'':`<h3 class="country-head">${esc(co)} <small>${tot.toLocaleString()} places · ${CONT[buf[0].ct]}</small></h3>`}<div class="${viewMode==='list'?'list-view':'grid'}">${buf.map(card).join('')}</div></section>`;buf=[]};
  next.slice(k).forEach(p=>{if(buf.length&&p.co!==buf[0].co)flush();buf.push(p)});flush();
  list.insertAdjacentHTML('beforeend',html);shown+=next.length;
  if(shown<F.length){list.insertAdjacentHTML('beforeend',`<button class="more">Show more · ${(F.length-shown).toLocaleString()} left</button>`);mo.observe(list.querySelector('.more'))}
 }
-function setCountryCollapsed(section,collapsed){const iso=section.dataset.iso;if(collapsed)collapsedCountries.add(iso);else collapsedCountries.delete(iso);section.classList.toggle('collapsed',collapsed);const button=section.querySelector('[data-toggle-country]');button?.setAttribute('aria-expanded',String(!collapsed));section.querySelector('.country-inner')?.setAttribute('aria-hidden',String(collapsed));}
-$('list').addEventListener('click',e=>{const toggle=e.target.closest('[data-toggle-country]');if(toggle){const section=toggle.closest('.country'),collapsed=!section.classList.contains('collapsed');setCountryCollapsed(section,collapsed);saveCollapsed();$('collapseAll').textContent=collapsedCountries.size?'Expand countries':'Collapse countries';return}const m=e.target.closest('.more');if(m){mo.unobserve(m);renderMore();return}const c=e.target.closest('.card');if(c)openP(P[+c.dataset.i])});
-document.querySelector('.view-group').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(!b)return;viewMode=b.dataset.view;document.querySelectorAll('[data-view]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));document.querySelectorAll('#list .grid,#list .list-view,#list .directory-view').forEach(x=>x.className=viewMode==='list'?'list-view':viewMode==='directory'?'directory-view':'grid')});
-const viewToggle=$('viewToggle'),viewPanel=$('viewPanel'),viewPanelInner=viewPanel.querySelector('.view-panel-inner');
-viewToggle.addEventListener('click',()=>{const open=viewToggle.getAttribute('aria-expanded')!=='true';viewToggle.setAttribute('aria-expanded',String(open));viewPanel.classList.toggle('open',open);viewPanel.setAttribute('aria-hidden',String(!open));viewPanelInner.inert=!open});
-$('sortPlaces').addEventListener('change',e=>{sortMode=e.target.value;apply()});
+$('list').addEventListener('click',e=>{const m=e.target.closest('.more');if(m){mo.unobserve(m);renderMore();return}const c=e.target.closest('.card');if(c)openP(P[+c.dataset.i])});
+document.querySelector('.view-group').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(!b)return;viewMode=b.dataset.view;document.querySelectorAll('[data-view]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));document.querySelectorAll('#list .grid,#list .list-view').forEach(x=>x.className=viewMode==='list'?'list-view':'grid')});
 $('collapseAll').addEventListener('click',()=>{const sections=[...document.querySelectorAll('#list .country')],allCollapsed=sections.length&&sections.every(s=>s.classList.contains('collapsed')),shouldCollapse=!allCollapsed;new Set(F.map(p=>p.iso)).forEach(iso=>{if(shouldCollapse)collapsedCountries.add(iso);else collapsedCountries.delete(iso)});sections.forEach(s=>setCountryCollapsed(s,shouldCollapse));saveCollapsed();$('collapseAll').textContent=shouldCollapse?'Expand countries':'Collapse countries'});
 
 /* ---------- globe ---------- */
