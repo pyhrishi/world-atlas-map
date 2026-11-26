@@ -816,9 +816,22 @@ $('zout').onclick=()=>{zoom=Math.max(.8,zoom/1.4);lastInt=performance.now();draw
 $('greset').onclick=()=>{st.co='';zoom=1;rot=[-78,-18];idle=true;apply()};
 $('pv').onclick=()=>$('lt').scrollIntoView({behavior:'smooth'});
 $('px').onclick=()=>{st.co='';apply();zoom=Math.max(1,zoom/2);draw()};
-// idle spin
-let lastT=0;const spin=t=>{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&!drag&&!st.co&&t-lastInt>3500&&visible){rot=[rot[0]+(t-lastT)*.006,rot[1]];draw()}lastT=t;requestAnimationFrame(spin)};
-let visible=true;new IntersectionObserver(es=>{visible=es[0].isIntersecting;$('tbar').classList.toggle('on',!visible);railUI();if(!visible)drawMini()}).observe($('gwrap'));
+// Idle globe animation: run only while the globe is visible and the page is active.
+let lastT=0,spinRaf=0,visible=true;
+const reduceMotion=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+const stopSpin=()=>{if(spinRaf)cancelAnimationFrame(spinRaf);spinRaf=0;lastT=0};
+const startSpin=()=>{if(!spinRaf&&visible&&!document.hidden&&!st.co&&!reduceMotion())spinRaf=requestAnimationFrame(spin)};
+const spin=t=>{
+ if(!visible||document.hidden||st.co||reduceMotion()){stopSpin();return}
+ if(lastT&& !drag && t-lastInt>3500){rot=[rot[0]+(t-lastT)*.006,rot[1]];draw()}
+ lastT=t;spinRaf=requestAnimationFrame(spin)
+};
+document.addEventListener('visibilitychange',()=>document.hidden?stopSpin():startSpin());
+new IntersectionObserver(es=>{
+ visible=es[0].isIntersecting;
+ $('tbar').classList.toggle('on',!visible);railUI();
+ if(!visible){stopSpin();drawMini()}else startSpin()
+}).observe($('gwrap'));
 $('tback').onclick=()=>$('hero').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
 /* hero fades and shrinks as you scroll */
 {const gw=$('gwrap'),tp=document.querySelector('.top');let raf=0;addEventListener('scroll',()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;const h=$('hero').offsetHeight,p=Math.min(1,Math.max(0,scrollY/h));gw.style.opacity=1-p*.85;gw.style.transform=`translateY(${p*h*.25}px) scale(${1-p*.18})`;tp.style.opacity=1-p*1.4;tp.style.transform=`translateY(${p*h*.15}px)`})},{passive:true})}
@@ -934,7 +947,7 @@ Promise.all([fetch('places.json').then(r=>r.json()),fetch('geo.json').then(r=>r.
  $('stats').innerHTML=`<div><b>${P.length.toLocaleString()}</b><span>places</span></div><div><b>${cn}</b><span>countries & territories</span></div><div><b>${tc('L')}</b><span>Legendary</span></div>`;
  $('cols').innerHTML=COLS.map(c=>`<button class="col" data-k="${c[0]}" aria-pressed="false"><span class="ic">${ic(c[2])}</span><span><b>${c[1]}</b><span>${colSet[c[0]].size.toLocaleString()} places</span></span></button>`).join('');
  $('cols').onclick=e=>{const b=e.target.closest('.col');if(!b)return;st.col=st.col===b.dataset.k?'':b.dataset.k;apply(true)};
- refreshBeen();size();apply();requestAnimationFrame(spin);
+ refreshBeen();size();apply();startSpin();
 }).catch(()=>{$('list').innerHTML='<div class="empty">Could not load the atlas data.</div>'});
 }
 </script>
