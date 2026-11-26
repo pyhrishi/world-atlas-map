@@ -1,4 +1,4 @@
-const V='atlas-v12-vendored',APP='app-'+V,PH='photos-v1',API='wiki-v1';
+const V='atlas-v13-trips',APP='app-'+V,PH='photos-v1',API='wiki-v1';
 const CORE=['./','index.html','geo.json','manifest.json','apple-touch-icon.png','icon-192.png','icon-512.png','vendor/d3-7.8.5.min.js','vendor/firebase-app-compat-10.12.2.js','vendor/firebase-auth-compat-10.12.2.js','vendor/firebase-firestore-compat-10.12.2.js'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(APP).then(c=>Promise.all(CORE.map(u=>c.add(new Request(u,{mode:u.startsWith('http')?'no-cors':'same-origin'})).catch(()=>{})))).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>![APP,PH,API].includes(k)).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
@@ -13,7 +13,7 @@ async function cacheFirst(req,name,max){const c=await caches.open(name),hit=awai
 async function netFirst(req,name,max){const c=await caches.open(name);try{const r=await fetch(req);if(r.ok){c.put(req,r.clone());trim(name,max)}return r}catch(e){return(await c.match(req))||new Response('{}',{headers:{'content-type':'application/json'}})}}
 self.addEventListener('fetch',e=>{const req=e.request;if(req.method!=='GET')return;const u=new URL(req.url);
  if(u.hostname==='upload.wikimedia.org')return e.respondWith(cacheFirst(req,PH,3000));
- if(u.hostname==='en.wikipedia.org')return e.respondWith(netFirst(req,API,3000));
+ if(u.hostname==='en.wikipedia.org'){if(u.search.includes('prop=coordinates'))return;return e.respondWith(netFirst(req,API,3000))}
  if(req.mode==='navigate')return e.respondWith(fresh(new Request('index.html'),APP));
  if(u.origin===location.origin&&/\.(json|html)$|\/$/.test(u.pathname))return e.respondWith(fresh(req,APP));
  if(u.origin===location.origin||/cdnjs\.cloudflare\.com|fonts\.(googleapis|gstatic)\.com/.test(u.hostname)||(u.hostname==="www.gstatic.com"&&u.pathname.startsWith("/firebasejs/")))return e.respondWith(swr(req,APP));
