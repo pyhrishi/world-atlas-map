@@ -9,7 +9,6 @@
 <!-- Start critical downloads early while the browser parses the page. -->
 <link rel="preload" href="places.json" as="fetch" crossorigin>
 <link rel="preload" href="geo.json" as="fetch" crossorigin>
-<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js" as="script">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -402,6 +401,10 @@ body.locked{overflow:hidden}
 .auth .msg.err{color:#ff9d85}.auth .msg.ok{color:var(--been)}
 .auth .spin{width:28px;height:28px;border-radius:50%;border:3px solid #3a3e45;border-top-color:var(--acc);animation:rot .8s linear infinite;margin:20px auto}
 @keyframes rot{to{transform:rotate(360deg)}}
+.bk{margin:4px 0 0;padding:16px;border-radius:16px;background:var(--s2);border:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.bk b{font-size:15px}.bk span{font-size:13px;color:var(--mute)}
+.bkr{display:flex;gap:8px;flex-wrap:wrap}.bkr .btn{flex:1;min-width:140px;justify-content:center;cursor:pointer}
+.bkm{margin:0;font-size:13px;color:var(--mute);min-height:18px}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -581,6 +584,7 @@ body.locked{overflow:hidden}
 
 <dialog class="sheet" id="ts" aria-labelledby="tsh"><div class="sh"><h3 id="tsh">My travels</h3><button class="x" data-close aria-label="Close"><svg class="i"><use href="#i-x"/></svg></button></div>
  <div class="sb" id="tbody"></div>
+ <div class="bk"><b>Backup</b><span>Save your 10,000 places, marks and searches as a file. Keep it somewhere safe, like Files or Google Drive.</span><div class="bkr"><button class="btn" id="bkDown" type="button"><svg class="i"><use href="#i-arrow-down"/></svg>Download</button><label class="btn" id="bkUpL"><svg class="i"><use href="#i-rotate-ccw"/></svg>Restore<input type="file" id="bkUp" accept="application/json,.json" hidden></label></div><p class="bkm" id="bkMsg" role="status"></p></div>
  <div class="sf"><button class="btn" id="tcopy"><svg class="i"><use href="#i-copy"/></svg>Copy my lists</button><button class="btn pri" data-close id="tshow">Done</button></div>
 </dialog>
 
@@ -610,10 +614,10 @@ body.locked{overflow:hidden}
  </div>
 </dialog>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="vendor/d3-7.8.5.min.js"></script>
+<script src="vendor/firebase-app-compat-10.12.2.js"></script>
+<script src="vendor/firebase-auth-compat-10.12.2.js"></script>
+<script src="vendor/firebase-firestore-compat-10.12.2.js"></script>
 <script>
 {
 const $=id=>document.getElementById(id);
@@ -1158,6 +1162,24 @@ function syncMarks(u){
 function marksChanged(){if(!P.length)return;markCounts=null;refreshBeen();dock();draw();
  document.querySelectorAll('#list .card').forEach(c=>{const p=P[+c.dataset.i];if(p)c.outerHTML=card(p)});
  if(st.co)head();if($('dd').open&&cur)marksUI()}
+/* ---------- backup & restore ---------- */
+function backupData(){let mt={};try{mt=JSON.parse(localStorage.getItem('atlas10k-mt')||'{}')}catch(_){}
+ return {app:'10k-places',version:1,exportedAt:new Date().toISOString(),places:P.map(p=>[p.n,p.c,p.t,p.h,p.s,p.co,p.ct,p.iso]),marks,markTimes:mt,recent}}
+$('bkDown').onclick=async()=>{const msg=$('bkMsg');try{
+ const name='10k-places-backup-'+new Date().toISOString().slice(0,10)+'.json';
+ const file=new File([JSON.stringify(backupData())],name,{type:'application/json'});
+ if(navigator.canShare&&navigator.canShare({files:[file]})&&/iPhone|iPad|Macintosh/.test(navigator.userAgent)&&'ontouchend' in document){await navigator.share({files:[file],title:name});msg.textContent='Backup ready. Choose "Save to Files" or Google Drive.'}
+ else{const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);msg.textContent='Backup downloaded: '+name}
+}catch(e){if(e&&e.name==='AbortError')return;msg.textContent='Could not create the backup. '+(e.message||'')}};
+$('bkUp').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const msg=$('bkMsg');
+ try{const d=JSON.parse(await f.text());if(d.app!=='10k-places'||!Array.isArray(d.places))throw new Error('This file is not a 10,000 Places backup.');
+  if(!confirm(`Restore this backup from ${(d.exportedAt||'').slice(0,10)}? It has ${d.places.length.toLocaleString()} places and ${Object.keys(d.marks||{}).length} marks. Marks are merged with your current ones.`))return;
+  msg.textContent='Restoring…';
+  if(d.places.length&&fbDb){const parts=3,sz=Math.ceil(d.places.length/parts);for(let i=0;i<parts;i++)await fbDb.doc('atlas/p'+i).set({d:JSON.stringify(d.places.slice(i*sz,(i+1)*sz))});await fbDb.doc('atlas/meta').set({chunks:parts,count:d.places.length,at:firebase.firestore.FieldValue.serverTimestamp()})}
+  marks=Object.assign({},d.marks||{},marks);save();
+  if(Array.isArray(d.recent)&&!recent.length){recent=d.recent.slice(0,6);try{localStorage.setItem('atlas10k-recent',JSON.stringify(recent))}catch(_){}}
+  msg.textContent='Restored. Reloading…';setTimeout(()=>location.reload(),900)
+ }catch(err){msg.textContent=(err&&err.code==='permission-denied')?'Your database refused the restore. Check that you are signed in.':'Could not restore: '+(err.message||err)}};
 function startApp(u){
 Promise.all([loadPlaces(),fetch('geo.json').then(r=>r.json())]).then(([d,g])=>{
  authEl.hidden=true;document.body.classList.remove('locked');
