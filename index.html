@@ -96,9 +96,26 @@ h1 em{color:var(--mute)}
 .chip-on button{border:0;background:var(--s3);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;cursor:pointer}
 .chip-on svg.i{width:14px;height:14px}
 .country{margin-top:30px}
-.country h3{position:sticky;top:0;z-index:3;padding:12px 0 10px;background:linear-gradient(var(--bg) 70%,#13141700);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);font:400 26px/1.1 "Instrument Serif",serif;margin:0 0 4px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.country h3 small{font:500 13px Inter,sans-serif;color:var(--dim)}
+.country-head{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:10px;width:100%;padding:12px 10px 10px 0;border:0;background:linear-gradient(var(--bg) 70%,#13141700);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);font:400 26px/1.1 "Instrument Serif",serif;text-align:left;cursor:pointer}
+.country-head .chev{width:28px;height:28px;display:grid;place-items:center;border:1px solid var(--line);border-radius:9px;background:var(--s1);font:500 15px Inter,sans-serif;color:var(--mute);transition:transform .18s}
+.country.collapsed .country-head .chev{transform:rotate(-90deg)}
+.country-head small{font:500 13px Inter,sans-serif;color:var(--dim)}
+.country.collapsed .grid{display:none}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.list-view{display:flex;flex-direction:column;gap:7px}
+.list-view .card{grid-template-columns:40px minmax(0,1fr);padding:12px 14px}
+.list-view .card .h{display:block}
+.list-view .card .meta{margin-top:5px}
+.compact-view{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:7px}
+.compact-view .card{grid-template-columns:30px minmax(0,1fr);gap:9px;padding:10px}
+.compact-view .card .cic{width:30px;height:30px}
+.compact-view .card .h{display:none}
+.compact-view .card .meta{margin-top:5px}
+.view-tools{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap;margin:12px 0}
+.view-group{display:flex;gap:3px;padding:3px;background:var(--s1);border:1px solid var(--line);border-radius:12px}
+.view-group button,.sort-select{min-height:36px;border:0;border-radius:9px;background:transparent;color:var(--mute);padding:0 10px;font:500 12px Inter,sans-serif;cursor:pointer}
+.view-group button[aria-pressed=true]{background:var(--s3);color:var(--ink)}
+.sort-select{border:1px solid var(--line);background:var(--s1);color:var(--ink);padding:0 10px}
 .card{all:unset;box-sizing:border-box;display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;padding:14px;background:var(--s1);border:1px solid var(--line);border-radius:var(--r);cursor:pointer;transition:border-color .15s,background .15s}
 .card:hover{border-color:#4a4f58;background:var(--s2)}
 .card:focus-visible{outline:2px solid var(--acc)}
@@ -490,6 +507,7 @@ html,body{width:100%;max-width:100%;overflow-x:clip}
  <div class="sec-h"><h2>Collections</h2><p>Tap one to filter the list and the globe</p></div>
  <div class="cols" id="cols"></div>
  <div class="lhead"><div><h2 id="lt">All places</h2><p id="ls"></p></div><div class="chips-on" id="active"></div></div>
+ <div class="view-tools" aria-label="Destination display options"><div class="view-group" role="group" aria-label="Layout"><button type="button" data-view="grid" aria-pressed="true">Cards</button><button type="button" data-view="list" aria-pressed="false">List</button><button type="button" data-view="compact" aria-pressed="false">Compact</button></div><select class="sort-select" id="sortPlaces" aria-label="Sort destinations"><option value="recommended">Recommended</option><option value="az">Name A–Z</option><option value="za">Name Z–A</option><option value="tier">Tier first</option></select><button class="sort-select" id="collapseAll" type="button">Collapse countries</button></div>
  <div class="cband" id="cband"></div>
  <div class="qchips" id="qc"></div>
  <main id="list"><div class="sk" style="margin-top:10px"></div><div class="sk" style="margin-top:10px"></div><div class="sk" style="margin-top:10px"></div><div class="sk" style="margin-top:10px"></div><div class="sk" style="margin-top:10px"></div><div class="sk" style="margin-top:10px"></div></main>
@@ -586,6 +604,9 @@ function months(s){s=s.toLowerCase();if(/year|monthly|twice/.test(s))return 4095
 
 let P=[],F=[],G=null,shown=0,cur=null;
 const st={q:'',ct:'',co:'',c:'',t:'',m:-1,col:'',l:''};
+let viewMode='grid',sortMode='recommended',collapsedCountries=new Set();
+try{collapsedCountries=new Set(JSON.parse(localStorage.getItem('atlas10k-collapsed')||'[]'))}catch(e){}
+const saveCollapsed=()=>{try{localStorage.setItem('atlas10k-collapsed',JSON.stringify([...collapsedCountries]))}catch(e){}};
 let marks={};
 try{marks=JSON.parse(localStorage.getItem('atlas10k-marks')||'{}');const old=JSON.parse(localStorage.getItem('atlas5k')||'[]');old.forEach(k=>{if(!marks[k])marks[k]='w'})}catch(e){}
 const save=()=>{try{localStorage.setItem('atlas10k-marks',JSON.stringify(marks))}catch(e){}};
@@ -598,6 +619,9 @@ let colSet={},countryTotals=new Map();
 function base(p,skipCo){const q=st.q;return(!st.ct||p.ct===st.ct)&&(skipCo||!st.co||p.iso===st.co)&&(!st.c||p.c===st.c)&&(!st.t||p.t===st.t)&&(st.m<0||(p.mo>>st.m)&1)&&(!st.col||colSet[st.col].has(p))&&(!st.l||marks[K(p)]===st.l)&&(!q||p.s_.includes(q))}
 function apply(scroll){
  F=P.filter(p=>base(p,false));
+ if(sortMode==='az')F.sort((a,b)=>a.n.localeCompare(b.n));
+ else if(sortMode==='za')F.sort((a,b)=>b.n.localeCompare(a.n));
+ else if(sortMode==='tier')F.sort((a,b)=>'LIG'.indexOf(a.t)-'LIG'.indexOf(b.t)||a.co.localeCompare(b.co)||a.n.localeCompare(b.n));
  countryTotals=new Map();F.forEach(p=>countryTotals.set(p.co,(countryTotals.get(p.co)||0)+1));
  counts=new Map();P.forEach(p=>{if(base(p,true))counts.set(p.iso,(counts.get(p.iso)||0)+1)});activePickDots=G?G.d.filter(d=>counts.has(d[0])):[];maxC=Math.max(1,...counts.values());
  shown=0;$('list').innerHTML='';renderMore();head();dock();draw();
@@ -740,12 +764,15 @@ function renderMore(){
  list.querySelector('.more')?.remove();
  const next=F.slice(shown,shown+200);let k=0;
  if(shown&&next.length&&next[0].co===F[shown-1].co){const gs=list.querySelectorAll('.grid');while(k<next.length&&next[k].co===next[0].co)k++;gs[gs.length-1].insertAdjacentHTML('beforeend',next.slice(0,k).map(card).join(''))}
- let html='',buf=[];const flush=()=>{if(!buf.length)return;const co=buf[0].co,tot=countryTotals.get(co)||0;html+=`<section class="country" data-ct="${buf[0].ct}">${st.co?'':`<h3>${esc(co)}<small>${tot} place${tot>1?'s':''} · ${CONT[buf[0].ct]}</small></h3>`}<div class="grid">${buf.map(card).join('')}</div></section>`;buf=[]};
+ let html='',buf=[];const flush=()=>{if(!buf.length)return;const co=buf[0].co,iso=buf[0].iso,tot=countryTotals.get(co)||0,collapsed=collapsedCountries.has(iso);html+=`<section class="country${collapsed?' collapsed':''}" data-iso="${iso}" data-ct="${buf[0].ct}">${st.co?'':`<button class="country-head" type="button" data-toggle-country="${iso}" aria-expanded="${!collapsed}"><span class="chev">⌄</span><span>${esc(co)} <small>${tot.toLocaleString()} places · ${CONT[buf[0].ct]}</small></span></button>`}<div class="${viewMode==='list'?'list-view':viewMode==='compact'?'compact-view':'grid'}">${buf.map(card).join('')}</div></section>`;buf=[]};
  next.slice(k).forEach(p=>{if(buf.length&&p.co!==buf[0].co)flush();buf.push(p)});flush();
  list.insertAdjacentHTML('beforeend',html);shown+=next.length;
  if(shown<F.length){list.insertAdjacentHTML('beforeend',`<button class="more">Show more · ${(F.length-shown).toLocaleString()} left</button>`);mo.observe(list.querySelector('.more'))}
 }
-$('list').addEventListener('click',e=>{const m=e.target.closest('.more');if(m){mo.unobserve(m);renderMore();return}const c=e.target.closest('.card');if(c)openP(P[+c.dataset.i])});
+$('list').addEventListener('click',e=>{const toggle=e.target.closest('[data-toggle-country]');if(toggle){const iso=toggle.dataset.toggleCountry;if(collapsedCountries.has(iso))collapsedCountries.delete(iso);else collapsedCountries.add(iso);saveCollapsed();const section=toggle.closest('.country');section.classList.toggle('collapsed',collapsedCountries.has(iso));toggle.setAttribute('aria-expanded',String(!collapsedCountries.has(iso)));$('collapseAll').textContent=collapsedCountries.size?'Expand countries':'Collapse countries';return}const m=e.target.closest('.more');if(m){mo.unobserve(m);renderMore();return}const c=e.target.closest('.card');if(c)openP(P[+c.dataset.i])});
+document.querySelector('.view-group').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(!b)return;viewMode=b.dataset.view;document.querySelectorAll('[data-view]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));document.querySelectorAll('#list .grid,#list .list-view,#list .compact-view').forEach(x=>x.className=viewMode==='list'?'list-view':viewMode==='compact'?'compact-view':'grid')});
+$('sortPlaces').addEventListener('change',e=>{sortMode=e.target.value;apply()});
+$('collapseAll').addEventListener('click',()=>{const sections=[...document.querySelectorAll('#list .country')];const shouldCollapse=sections.some(s=>!s.classList.contains('collapsed'));sections.forEach(s=>{const iso=s.dataset.iso;if(shouldCollapse)collapsedCountries.add(iso);else collapsedCountries.delete(iso);s.classList.toggle('collapsed',shouldCollapse);s.querySelector('[data-toggle-country]')?.setAttribute('aria-expanded',String(!shouldCollapse))});saveCollapsed();$('collapseAll').textContent=shouldCollapse?'Expand countries':'Collapse countries'});
 
 /* ---------- globe ---------- */
 const cv=$('globe'),cx=cv.getContext('2d');
