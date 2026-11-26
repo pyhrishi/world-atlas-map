@@ -9,7 +9,7 @@
 <!-- Start critical downloads early while the browser parses the page. -->
 <link rel="preload" href="places.json" as="fetch" crossorigin>
 <link rel="preload" href="geo.json" as="fetch" crossorigin>
-<link rel="preload" href="https://ajax.googleapis.com/ajax/libs/d3js/7.8.5/d3.min.js" as="script">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js" as="script">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -587,7 +587,7 @@ html,body{width:100%;max-width:100%;overflow-x:clip}
  </div>
 </dialog>
 
-<script src="https://ajax.googleapis.com/ajax/libs/d3js/7.8.5/d3.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js'"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js" onerror="this.onerror=null;this.src='https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js'"></script>
 <script>
 {
 const $=id=>document.getElementById(id);
