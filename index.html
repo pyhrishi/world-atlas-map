@@ -579,7 +579,7 @@ let marks={};
 try{marks=JSON.parse(localStorage.getItem('atlas10k-marks')||'{}');const old=JSON.parse(localStorage.getItem('atlas5k')||'[]');old.forEach(k=>{if(!marks[k])marks[k]='w'})}catch(e){}
 const save=()=>{try{localStorage.setItem('atlas10k-marks',JSON.stringify(marks))}catch(e){}};
 const K=p=>p.n+'|'+p.co;
-let PK=new Map();
+let PK=new Map(),countryNameByIso=new Map();
 const buzz=()=>{try{navigator.vibrate&&navigator.vibrate(10)}catch(e){}};
 
 /* ---------- filtering ---------- */
@@ -813,7 +813,7 @@ cv.addEventListener('pointermove',e=>{
  if(ptrs.has(e.pointerId))ptrs.set(e.pointerId,[e.offsetX,e.offsetY]);
  if(ptrs.size===2&&pinch){const [a,b]=[...ptrs.values()];zoom=Math.max(.8,Math.min(6,pinch.z*Math.hypot(a[0]-b[0],a[1]-b[1])/pinch.d));draw();return}
  if(drag){const dx=e.offsetX-drag.x,dy=e.offsetY-drag.y;drag.moved=Math.max(drag.moved,Math.abs(dx)+Math.abs(dy));const k=70/(R*zoom);rot=[drag.r[0]+dx*k,Math.max(-80,Math.min(80,drag.r[1]-dy*k))];hide();draw();return}
- if(e.pointerType==='mouse'){const iso=pick(e.offsetX,e.offsetY);if(iso!==hoverIso){hoverIso=iso;draw()}const tip=$('tip');if(iso&&counts.get(iso)){const p=P.find(x=>x.iso===iso);tip.innerHTML=`<b>${esc(p.co)}</b> · ${counts.get(iso)} places`;tip.style.left=e.offsetX+'px';tip.style.top=e.offsetY+'px';tip.style.opacity=1;cv.style.cursor='pointer'}else{hide();cv.style.cursor=''}}
+ if(e.pointerType==='mouse'){const iso=pick(e.offsetX,e.offsetY);if(iso!==hoverIso){hoverIso=iso;draw()}const tip=$('tip');if(iso&&counts.get(iso)){tip.innerHTML=`<b>${esc(countryNameByIso.get(iso)||'')}</b> · ${counts.get(iso)} places`;tip.style.left=e.offsetX+'px';tip.style.top=e.offsetY+'px';tip.style.opacity=1;cv.style.cursor='pointer'}else{hide();cv.style.cursor=''}}
 });
 function hide(){$('tip').style.opacity=0}
 const end=e=>{const wasClick=drag&&drag.moved<6&&ptrs.size===1;ptrs.delete(e.pointerId);if(ptrs.size<2)pinch=0;if(wasClick&&e.type==='pointerup'){const iso=pick(e.offsetX,e.offsetY);if(iso)selectIso(iso)}if(!ptrs.size)drag=null;lastInt=performance.now()};
@@ -949,7 +949,7 @@ Promise.all([fetch('places.json').then(r=>r.json()),fetch('geo.json').then(r=>r.
  P.sort((a,b)=>ord[a.ct]-ord[b.ct]||cc[b.co]-cc[a.co]||a.co.localeCompare(b.co)||to[a.t]-to[b.t]||a.i0-b.i0);
  PK=new Map(P.map(p=>[K(p),p]));P.forEach((p,i)=>{p.i=i;p.x=(p.n+' '+p.h).toLowerCase();p.s_=(p.n+' '+p.co+' '+CONT[p.ct]+' '+p.h+' '+CAT[p.c][0]).toLowerCase();p.mo=months(p.s)});
  COLS.forEach(c=>colSet[c[0]]=new Set(P.filter(c[3])));
- {const m=new Map();P.forEach(p=>{const c=m.get(p.iso)||{iso:p.iso,n:p.co,ct:p.ct,k:0};c.k++;m.set(p.iso,c)});CL=[...m.values()].sort((a,b)=>a.n.localeCompare(b.n))}
+ {const m=new Map();P.forEach(p=>{const c=m.get(p.iso)||{iso:p.iso,n:p.co,ct:p.ct,k:0};c.k++;m.set(p.iso,c)});CL=[...m.values()].sort((a,b)=>a.n.localeCompare(b.n));countryNameByIso=new Map(CL.map(c=>[c.iso,c.n]))}
  G={f:g.f.map(f=>({type:'Feature',i:f.i,geometry:{type:f.t,coordinates:f.c}})),d:g.d,c:g.c};G.byIso={};G.f.forEach(f=>{if(f.i)G.byIso[f.i]=f});
  const cn=new Set(P.map(p=>p.iso)).size,tc=t=>P.filter(p=>p.t===t).length;
  $('stats').innerHTML=`<div><b>${P.length.toLocaleString()}</b><span>places</span></div><div><b>${cn}</b><span>countries & territories</span></div><div><b>${tc('L')}</b><span>Legendary</span></div>`;
