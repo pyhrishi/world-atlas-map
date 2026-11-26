@@ -761,6 +761,7 @@ function renderMore(){
 }
 $('list').addEventListener('click',e=>{const m=e.target.closest('.more');if(m){mo.unobserve(m);renderMore();return}const c=e.target.closest('.card');if(c)openP(P[+c.dataset.i])});
 document.querySelector('.view-group').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(!b)return;viewMode=b.dataset.view;document.querySelectorAll('[data-view]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));document.querySelectorAll('#list .grid,#list .list-view').forEach(x=>x.className=viewMode==='list'?'list-view':'grid')});
+$('sortPlaces').addEventListener('change',e=>{sortMode=e.target.value;apply()});
 
 /* ---------- globe ---------- */
 const cv=$('globe'),cx=cv.getContext('2d');
