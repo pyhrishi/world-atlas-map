@@ -587,7 +587,7 @@ let colSet={};
 function base(p,skipCo){const q=st.q;return(!st.ct||p.ct===st.ct)&&(skipCo||!st.co||p.iso===st.co)&&(!st.c||p.c===st.c)&&(!st.t||p.t===st.t)&&(st.m<0||(p.mo>>st.m)&1)&&(!st.col||colSet[st.col].has(p))&&(!st.l||marks[K(p)]===st.l)&&(!q||p.s_.includes(q))}
 function apply(scroll){
  F=P.filter(p=>base(p,false));
- counts=new Map();P.forEach(p=>{if(base(p,true))counts.set(p.iso,(counts.get(p.iso)||0)+1)});maxC=Math.max(1,...counts.values());
+ counts=new Map();P.forEach(p=>{if(base(p,true))counts.set(p.iso,(counts.get(p.iso)||0)+1)});activePickDots=G?G.d.filter(d=>counts.has(d[0])):[];maxC=Math.max(1,...counts.values());
  shown=0;$('list').innerHTML='';renderMore();head();dock();draw();
  if(st.co)stopSpin();else startSpin();
  if(scroll)setTimeout(()=>$('lt').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'}),60);
@@ -734,7 +734,7 @@ $('list').addEventListener('click',e=>{const m=e.target.closest('.more');if(m){m
 
 /* ---------- globe ---------- */
 const cv=$('globe'),cx=cv.getContext('2d');
-let W=0,H=0,R=0,dpr=1,rot=[-78,-18],zoom=1,counts=new Map(),maxC=1,hoverIso='',idle=true,lastInt=0,anim=null;
+let W=0,H=0,R=0,dpr=1,rot=[-78,-18],zoom=1,counts=new Map(),activePickDots=[],maxC=1,hoverIso='',idle=true,lastInt=0,anim=null;
 const proj=d3.geoOrthographic().clipAngle(90).precision(.4);const path=d3.geoPath(proj,cx);const grat=d3.geoGraticule10();
 let GX=0,GY=0;function size(){const b=cv.getBoundingClientRect(),nextDpr=Math.min(2,devicePixelRatio||1);if(b.width===W&&b.height===H&&nextDpr===dpr)return;dpr=nextDpr;W=b.width;H=b.height;cv.width=W*dpr;cv.height=H*dpr;
  if(innerWidth>=900){R=Math.min(W*0.3,(H-230)*0.5);GX=W>1100?W*0.58:W/2;GY=(H-210)/2+14}else{R=Math.min(W,H)*0.45;GX=W/2;GY=H/2}draw()}
@@ -792,7 +792,7 @@ function antiSun(){const now=Date.now();if(!sunCache||now-sunT>60000){const d=ne
 function pick(x,y){
  const r=R*zoom;if(Math.hypot(x-GX,y-GY)>r)return'';
  const center=[-rot[0],-rot[1]];let best='',bd=16*16;
- for(const d of G.d){const ll=[d[2],d[1]];if(d3.geoDistance(ll,center)>1.5)continue;if(!counts.get(d[0]))continue;const p=proj(ll);const dd=(p[0]-x)**2+(p[1]-y)**2;if(dd<bd){bd=dd;best=d[0]}}
+ for(const d of activePickDots){const ll=[d[2],d[1]];if(d3.geoDistance(ll,center)>1.5)continue;const p=proj(ll);const dd=(p[0]-x)**2+(p[1]-y)**2;if(dd<bd){bd=dd;best=d[0]}}
  if(best)return best;
  const ll=proj.invert([x,y]);if(!ll)return'';
  for(const f of G.f)if(f.i&&d3.geoContains(f,ll))return f.i;return''}
