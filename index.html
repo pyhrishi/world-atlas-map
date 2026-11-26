@@ -62,6 +62,21 @@ h1 em{color:var(--mute)}
 .copt:hover{background:var(--s2)}
 .copt[aria-pressed=true]{background:#3a2621;color:var(--acc)}
 .copt em{font-style:normal;color:var(--dim);font-size:13px;font-variant-numeric:tabular-nums}
+.clist-summary{font-size:12px;color:var(--dim);padding:8px 2px 2px}
+.clist-group{margin-top:14px}
+.clist-group h4{margin:0 0 7px}
+.copt{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:11px;min-height:66px;padding:8px 10px;margin:3px 0;border:1px solid transparent;transition:background-color .14s,border-color .14s,transform .14s}
+.copt:active{transform:scale(.99)}
+.copt[aria-pressed=true]{border-color:#75483e;background:#30231f;color:var(--ink)}
+.cflag{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:var(--s3);font-size:25px;line-height:1}
+.cinfo{min-width:0;display:flex;flex-direction:column;gap:3px}
+.cname{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmeta{font-size:11px;color:var(--dim)}
+.cstat{display:flex;align-items:center;gap:6px;color:var(--mute);font-size:12px;font-variant-numeric:tabular-nums}
+.cbar{width:42px;height:4px;border-radius:4px;background:var(--s3);overflow:hidden}
+.cbar i{display:block;height:100%;border-radius:4px;background:var(--acc)}
+.copt .cselected{color:var(--acc);font-size:16px}
+@media(max-width:640px){.copt{min-height:70px}.cbar{width:30px}}
 .legend{display:flex;gap:6px 12px;font-size:12px;color:var(--dim);flex-wrap:wrap;justify-content:center}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
 /* collections */
@@ -882,9 +897,12 @@ $('fs').addEventListener('close',()=>apply(true));$('ms').addEventListener('clos
 
 /* ---------- country picker ---------- */
 let CL=[];
+const countryFlag=iso=>/^[A-Z]{2}$/.test(iso)?String.fromCodePoint(...[...iso].map(c=>127397+c.charCodeAt(0))):'🌐';
 function countryList(){const q=$('cq').value.trim().toLowerCase();const groups={};
- CL.filter(c=>!q||c.n.toLowerCase().includes(q)).forEach(c=>(groups[c.ct]=groups[c.ct]||[]).push(c));
- $('clist').innerHTML=Object.keys(CONT).filter(k=>groups[k]).map(k=>`<h4>${CONT[k]}</h4>`+groups[k].map(c=>`<button class="copt" data-iso="${c.iso}" aria-pressed="${st.co===c.iso}"><span>${esc(c.n)}</span><em>${c.k} places</em></button>`).join('')).join('')||'<p style="color:var(--mute)">No country matches.</p>'}
+ const matched=CL.filter(c=>!q||c.n.toLowerCase().includes(q)||c.iso.toLowerCase().includes(q)||CONT[c.ct].toLowerCase().includes(q));
+ const maxPlaces=Math.max(1,...CL.map(c=>c.k));
+ matched.forEach(c=>(groups[c.ct]=groups[c.ct]||[]).push(c));
+ $('clist').innerHTML=`<div class="clist-summary">${matched.length} of ${CL.length} countries & territories · ${matched.reduce((n,c)=>n+c.k,0).toLocaleString()} destinations</div>`+Object.keys(CONT).filter(k=>groups[k]).map(k=>`<div class="clist-group"><h4>${CONT[k]}</h4>${groups[k].map(c=>`<button class="copt" data-iso="${c.iso}" aria-pressed="${st.co===c.iso}"><span class="cflag" aria-hidden="true">${countryFlag(c.iso)}</span><span class="cinfo"><span class="cname">${esc(c.n)}</span><span class="cmeta">${CONT[c.ct]} · ${c.iso}</span></span><span class="cstat"><span>${c.k}</span><span class="cbar"><i style="width:${Math.max(4,c.k/maxPlaces*100)}%"></i></span>${st.co===c.iso?'<b class="cselected">✓</b>':''}</span></button>`).join('')}</div>`).join('')||'<p style="color:var(--mute)">No country matches. Try a country, continent, or code.</p>'}
 let fromFilters=false;
 function openCountries(ff){fromFilters=ff;$('cq').value='';countryList();$('cs').showModal();if(innerWidth>640)$('cq').focus()}
 $('cq').addEventListener('input',countryList);
